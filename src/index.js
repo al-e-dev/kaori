@@ -31,7 +31,7 @@ const start = async () => {
         printQRInTerminal: false
     })
 
-    if (!client.authState.creds.registered) {
+    if (!sock.authState.creds.registered) {
 		const number = await question("Ingresa tu número de WhatsApp activo: ")
         if (!(sock.onWhatsApp(number))[0].exist) new Error("Este numero no existe dentro de whatsapp.")
 		const code = await client.requestPairingCode(number)
