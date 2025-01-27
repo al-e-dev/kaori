@@ -109,13 +109,11 @@ const start = async () => {
             if (!messages[i].message) continue
             if (type === 'notify') {
                 let m = await _content(sock, messages[i])
-    
                 for (const plugin of global.plugins) {
                     const isCommand = !plugin.disable && plugin.comand ? (Array.isArray(plugin.comand) ? plugin.comand.includes(m.command) : plugin.comand.test(m.body)) : undefined
-    
                     if (plugin.exec && typeof plugin.exec === 'function' && isCommand) {
                         await database(m, { sock, db })
-                        await plugin.exec.call(plugin, m, { sock, db })
+                        await plugin.exec.call(plugin, m, { sock, db, v: m.quoted ? m.quoted : m })
                     }
                 }
             }
