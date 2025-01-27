@@ -43,7 +43,7 @@ const start = async () => {
         const exist = await sock.onWhatsApp(number)
         if (!exist[0].exists) new Error("Este numero no existe dentro de whatsapp.")
         const code = await sock.requestPairingCode(number)
-        console.log(chalk.bold(`Emparejamiento con este código: ${code}`))
+        console.log(`Emparejamiento con este código: ${code}`)
     }
 
     sock.ev.on("connection.update", m => {
