@@ -1,3 +1,4 @@
+import "../src/config.js"
 import {
     DisconnectReason,
     makeInMemoryStore,
@@ -7,12 +8,17 @@ import {
 } from "@al-e-dev/baileys"
 
 import pino from "pino"
+import readline from 'readline'
+
 import { exec } from "child_process"
+
 import { _prototype } from "../lib/_whatsapp.js"
 import { _content } from "../lib/_content.js"
-import "../src/config.js"
+
 import database from "../lib/_database.js"
 
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
+const question = text => new Promise(resolve => rl.question(text, resolve))
 
 const start = async () => {
     const store = makeInMemoryStore({ logger: pino().child({ level: "silent", stream: "store" }) })
@@ -22,8 +28,15 @@ const start = async () => {
         logger: pino({ level: "silent" }),
         auth: state,
         browser: ["Base Ziooo", "Firefox", "3.0.0"],
-        printQRInTerminal: true
+        printQRInTerminal: false
     })
+
+    if (!client.authState.creds.registered) {
+		const number = await question("Ingresa tu número de WhatsApp activo: ")
+        if (!(sock.onWhatsApp(number))[0].exist) new Error("Este numero no existe dentro de whatsapp.")
+		const code = await client.requestPairingCode(number)
+		console.log(chalk.bold(`Emparejamiento con este código: ${code}`))
+	}
 
     sock.ev.on("connection.update", m => {
         const { connection, lastDisconnect } = m
