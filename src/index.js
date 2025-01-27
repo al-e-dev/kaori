@@ -5,8 +5,7 @@ import {
     useMultiFileAuthState,
     generateWAMessageFromContent,
     makeCacheableSignalKeyStore,
-    Browsers,
-    fetchLatestBaileysVersion
+    Browsers
 } from "@al-e-dev/baileys"
 
 import pino from "pino"
@@ -41,11 +40,6 @@ const start = async () => {
 
     if (!sock.authState.creds.registered) {
         const number = await question("Ingresa tu número de WhatsApp activo: ")
-
-        const exist = await sock.onWhatsApp(number)
-        if (!exist[0].exists) {
-            throw new Error("Este número no existe dentro de WhatsApp.")
-        }
         const code = await sock.requestPairingCode(number)
         console.log(`Emparejamiento con este código: ${code}`)
     }
