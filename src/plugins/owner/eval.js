@@ -4,6 +4,7 @@ export default {
     name: 'eval',
     params: ['eval', '%eval'],
     desc: 'eval',
+    isOwner: true,
     comand:  /^[_]/i,
     exec: async (m, { sock }) => {
         let evan
