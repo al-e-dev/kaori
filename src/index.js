@@ -24,10 +24,9 @@ const question = text => new Promise(resolve => rl.question(text, resolve))
 
 const start = async () => {
     const store = makeInMemoryStore({ logger: pino().child({ level: "silent", stream: "store" }) })
-    const { version } = await fetchLatestBaileysVersion()
     const { state, saveCreds } = await useMultiFileAuthState('./auth/session')
     const sock = _prototype({
-        version,
+        version: [2, 3000, 1017531287],
         logger: pino({ level: "silent" }),
         auth: {
             creds: state.creds,
