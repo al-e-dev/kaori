@@ -33,7 +33,9 @@ const start = async () => {
 
     if (!sock.authState.creds.registered) {
 		const number = await question("Ingresa tu número de WhatsApp activo: ")
-        if (!(sock.onWhatsApp(number))[0].exists) new Error("Este numero no existe dentro de whatsapp.")
+
+        const exist = await sock.onWhatsApp(number)
+        if (!exist[0].exists) new Error("Este numero no existe dentro de whatsapp.")
 		const code = await client.requestPairingCode(number)
 		console.log(chalk.bold(`Emparejamiento con este código: ${code}`))
 	}
