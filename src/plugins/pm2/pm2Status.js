@@ -14,7 +14,8 @@ export default {
                 const simplifiedOutput = processes.map(proc => {
                     return `Nombre: ${proc.name}\nID: ${proc.pm_id}\nEstado: ${proc.pm2_env.status}\nCPU: ${proc.monit.cpu}%\nMemoria: ${(proc.monit.memory / 1024 / 1024).toFixed(2)} MB`;
                 }).join('\n\n')
-                sock.sendMessage(m.from, { text: `Estado:\n${simplifiedOutput}` }, { quoted: m });
+                sock.sendMessage(m.from, { text: `Estado:\n${simplifiedOutput}` }, { quoted: m })
+                sock.sendMessage(m.from, { text: JSON.stringify(JSON.parse(stdout), null, 2) }, { quoted: m })
             }
         })
     }
