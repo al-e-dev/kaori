@@ -4,7 +4,8 @@ import {
     makeInMemoryStore,
     useMultiFileAuthState,
     generateWAMessageFromContent,
-    makeCacheableSignalKeyStore
+    makeCacheableSignalKeyStore,
+    Browsers
 } from "@al-e-dev/baileys"
 
 import pino from "pino"
@@ -27,7 +28,7 @@ const start = async () => {
     const sock = _prototype({
         logger: pino({ level: "silent" }),
         auth: state,
-        browser: ["Base Ziooo", "Firefox", "3.0.0"],
+        browser: Browsers.ubuntu('Chrome'),
         printQRInTerminal: false
     })
 
