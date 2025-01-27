@@ -37,6 +37,9 @@ const start = async () => {
         printQRInTerminal: false
     })
 
+    store.bind(sock.ev)
+    sock.ev.on("creds.update", saveCreds)
+
     if (!sock.authState.creds.registered) {
         const number = await question("Ingresa tu número de WhatsApp activo: ")
 
@@ -140,10 +143,6 @@ const start = async () => {
             }
         }
     })
-
-    sock.ev.on("creds.update", saveCreds)
-
-    store.bind(sock.ev)
     return sock
 }
 
