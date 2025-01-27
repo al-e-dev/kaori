@@ -5,7 +5,8 @@ import {
     useMultiFileAuthState,
     generateWAMessageFromContent,
     makeCacheableSignalKeyStore,
-    Browsers
+    Browsers,
+    fetchLatestBaileysVersion
 } from "@al-e-dev/baileys"
 
 import pino from "pino"
