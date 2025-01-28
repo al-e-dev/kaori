@@ -131,9 +131,7 @@ const start = async () => {
                 for (const plugin of global.plugins) {
                     const isCommand = !plugin.disable && plugin.comand ? (Array.isArray(plugin.comand) ? plugin.comand.includes(m.command) : plugin.comand.test(m.body)) : undefined
 
-                    if (plugin.isOwner && !m.isOwner) {
-                        continue
-                    }
+                    if (plugin.isOwner && !m.isOwner) continue
 
                     if (plugin.exec && typeof plugin.exec === 'function' && isCommand) {
                         await database(m, { sock, db })
