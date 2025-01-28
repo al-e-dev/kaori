@@ -2,7 +2,7 @@ import axios from "axios"
 import { CookieJar } from "tough-cookie"
 import { wrapper } from "axios-cookiejar-support"
 
-export default class Tiktok {
+export default new class Tiktok {
     constructor() {
         this.client = wrapper(axios.create({ jar: new CookieJar() }))
 
@@ -162,7 +162,7 @@ export default class Tiktok {
     }
 }
 
-const tiktok = new Tiktok()
+// const tiktok = new Tiktok()
 // tiktok.download("https://www.tiktok.com/@desahogo.0009/video/7457666639400586501?is_from_webapp=1&sender_device=pc")
-tiktok.tending("ES")
-tiktok.search("anime")
+// tiktok.tending("ES")
+// tiktok.search("anime")
