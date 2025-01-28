@@ -1,4 +1,5 @@
 import { exec } from 'child_process'
+import axios  from 'axios'
 
 export default {
     name: 'exec',

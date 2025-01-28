@@ -123,12 +123,6 @@ const start = async () => {
         }
     })
 
-    const saveToCache = (chat, message) => {
-        if (!chat.cache) chat.cache = [];
-        chat.cache.push({ key: message.key, message: message.message, timestamp: Date.now() });
-        chat.cache = chat.cache.filter(item => Date.now() - item.timestamp < 20 * 60 * 1000);
-    };
-
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
         for (let i = 0; i < messages.length; i++) {
             if (!messages[i].message) continue;
@@ -139,7 +133,9 @@ const start = async () => {
                     if (m.id.startsWith("ALE-DEV") || m.id.startsWith("BAE5")) return;
                     const chat = db.data.chats[m.from];
                     if (chat?.antidelete) {
-                        saveToCache(chat, m);
+                        if (!chat.cache) chat.cache = [];
+                        chat.cache.push({ key: m.key, message: m.message, timestamp: Date.now() });
+                        chat.cache = chat.cache.filter(item => Date.now() - item.timestamp < 20 * 60 * 1000);
                     }
                 }
                 for (const plugin of global.plugins) {
