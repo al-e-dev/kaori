@@ -2,7 +2,7 @@ import { exec } from "child_process";
 
 export default {
     name: 'pm2Logs',
-    params: ['scriptName'],
+    params: ['name'],
     desc: 'Obtiene los logs de un script con PM2',
     comand: ['pm2logs'],
     exec: async (m, { sock }) => {
@@ -14,5 +14,6 @@ export default {
                 sock.sendMessage(m.from, { text: `Logs de ${m.text}:\n${simplifiedLogs}` }, { quoted: m });
             }
         });
-    }
+    },
+    isOwner: true
 }

@@ -1,6 +1,6 @@
 export default {
     name: 'sticker',
-    params: ['sticker'],
+    params: ['media'],
     desc: 'Convierte imagenes/videos en stickers',
     comand: ['sticker', 's'],
     isMedia: true,

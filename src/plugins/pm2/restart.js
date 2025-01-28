@@ -2,7 +2,7 @@ import { exec } from "child_process";
 
 export default {
     name: 'pm2Restart',
-    params: ['scriptName'],
+    params: ['name'],
     desc: 'Reinicia un script con PM2',
     comand: ['pm2restart'],
     exec: async (m, { sock }) => {
@@ -13,5 +13,6 @@ export default {
                 sock.sendMessage(m.from, { text: `Script ${m.text} reiniciado con éxito.` }, { quoted: m });
             }
         });
-    }
+    },
+    isOwner: true
 }

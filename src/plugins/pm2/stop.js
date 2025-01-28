@@ -1,8 +1,8 @@
 import { exec } from "child_process";
 
 export default {
-    name: 'pm2Stop',
-    params: ['scriptName'],
+    name: 'stop',
+    params: ['name'],
     desc: 'Detiene un script con PM2',
     comand: ['pm2stop'],
     exec: async (m, { sock }) => {
@@ -13,5 +13,6 @@ export default {
                 sock.sendMessage(m.from, { text: `Script ${m.text} detenido con éxito.` }, { quoted: m });
             }
         });
-    }
+    },
+    isOwner: true
 }

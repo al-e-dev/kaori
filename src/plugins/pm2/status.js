@@ -25,5 +25,6 @@ export default {
 
             sock.sendMessage(m.from, { text: `Estado:\n${detailedOutput}` }, { quoted: m });
         })
-    }
+    },
+    isOwner: true
 }

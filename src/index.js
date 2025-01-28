@@ -1,5 +1,5 @@
 import "../src/config.js"
-import {
+import baileys, {
     DisconnectReason,
     makeInMemoryStore,
     useMultiFileAuthState,
@@ -10,6 +10,7 @@ import {
 
 import pino from "pino"
 import readline from 'readline'
+import moment from 'moment'
 
 import { exec } from "child_process"
 
@@ -98,7 +99,6 @@ const start = async () => {
         }
     })
 
-
     sock.ev.on("groups.update", async (changes) => {
         for (const { id, author, ...props } of changes) {
             const chat = db.data.chats[id]
@@ -123,24 +123,58 @@ const start = async () => {
         }
     })
 
+    const saveToCache = (chat, message) => {
+        if (!chat.cache) chat.cache = [];
+        chat.cache.push({ key: message.key, message: message.message, timestamp: Date.now() });
+        chat.cache = chat.cache.filter(item => Date.now() - item.timestamp < 20 * 60 * 1000);
+    };
+
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
         for (let i = 0; i < messages.length; i++) {
-            if (!messages[i].message) continue
+            if (!messages[i].message) continue;
             if (type === 'notify') {
-                let m = await _content(sock, messages[i])
+                let m = await _content(sock, messages[i]);
+
+                if (!m.isMe && m.message) {
+                    if (m.id.startsWith("ALE-DEV") || m.id.startsWith("BAE5")) return;
+                    const chat = db.data.chats[m.from];
+                    if (chat?.antidelete) {
+                        saveToCache(chat, m);
+                    }
+                }
                 for (const plugin of global.plugins) {
                     const isCommand = !plugin.disable && plugin.comand ? (Array.isArray(plugin.comand) ? plugin.comand.includes(m.command) : plugin.comand.test(m.body)) : undefined
 
                     if (plugin.isOwner && !m.isOwner) continue
 
-                    if (plugin.exec && typeof plugin.exec === 'function' && isCommand) {
-                        await database(m, { sock, db })
-                        await plugin.exec.call(plugin, m, { sock, db, v: m.quoted ? m.quoted : m })
+                    try {
+                        if (plugin.exec && typeof plugin.exec === 'function' && isCommand) {
+                            let args = { sock, db, v: m.quoted ? m.quoted : m }
+
+                            await database(m, { sock, db })
+                            await plugin.exec.call(plugin, m, args)
+                        }
+                    } catch (error) {
+                        sock.sendMessage(m.from, { text: `Error en el plugin ${plugin.name}: ${error.message}` })
                     }
                 }
             }
         }
     })
+
+    sock.ev.on('message.delete', async ({ key: { remoteJid, id, participant } }) => {
+        const chat = db.data.chats[remoteJid]
+        if (chat?.antidelete && chat.cache) {
+            const cache = chat.cache.find((item) => item.key.id === id)
+            if (cache) {
+                await sock.sendMessage(remoteJid, { text: `Mensaje eliminado por @${participant.split('@')[0]}`, contextInfo: { mentionedJid: [participant] } })
+
+                const message = generateWAMessageFromContent(remoteJid, cache.message, { userJid: sock.user.id })
+                await sock.relayMessage(remoteJid, message.message, { messageId: message.key.id })
+            }
+        }
+    })
+
     return sock
 }
 
