@@ -15,11 +15,10 @@ export default {
                         video: { url: data.media.nowatermark.play },
                         buttons: [
                             {
-                                buttonId: "",
+                                buttonId: "audio",
                                 buttonText: {
                                     displayText: 'Audio'
-                                },
-                                type: 1
+                                }
                             }
                         ],
                         headerType: 6,
@@ -40,7 +39,7 @@ export default {
                                 buttonId: "a",
                                 buttonText: {
                                     displayText: 'Audio'
-                                },
+                                }
                             }
                         ],
                         headerType: 6,
