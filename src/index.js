@@ -7,17 +7,11 @@ import baileys, {
     makeCacheableSignalKeyStore,
     Browsers
 } from "@al-e-dev/baileys"
-
 import pino from "pino"
 import readline from 'readline'
-import moment from 'moment'
-
 import { exec } from "child_process"
-
 import { _prototype } from "../lib/_whatsapp.js"
 import { _content } from "../lib/_content.js"
-
-import database from "../lib/_database.js"
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const question = text => new Promise(resolve => rl.question(text, resolve))
@@ -35,7 +29,7 @@ const start = async () => {
         browser: Browsers.ubuntu('Chrome'),
         printQRInTerminal: false
     })
-
+    
     store.bind(sock.ev)
     sock.ev.on("creds.update", saveCreds)
 
@@ -47,7 +41,6 @@ const start = async () => {
 
     sock.ev.on("connection.update", m => {
         const { connection, lastDisconnect } = m
-
         if (connection === "close") {
             const reconect = (lastDisconnect.error)?.output?.statusCode !== DisconnectReason.loggedOut
             console.log('Error en la conexión ', lastDisconnect.error, 'Reconectando', reconect)
@@ -127,27 +120,24 @@ const start = async () => {
         for (let i = 0; i < messages.length; i++) {
             if (!messages[i].message) continue;
             if (type === 'notify') {
-                let m = await _content(sock, messages[i]);
-
-                if (!m.isMe && m.message) {
-                    if (m.id.startsWith("ALE-DEV") || m.id.startsWith("BAE5")) return;
-                    const chat = db.data.chats[m.from];
-                    if (chat?.antidelete) {
-                        if (!chat.cache) chat.cache = [];
-                        chat.cache.push({ key: m.key, message: m.message, timestamp: Date.now() });
-                        chat.cache = chat.cache.filter(item => Date.now() - item.timestamp < 20 * 60 * 1000);
+                let m = await _content(sock, messages[i])
+                let args = { sock, db, v: m.quoted ? m.quoted : m }
+                
+                if (!m.isMe && m.message && !m.id.startsWith("ALE-DEV") && !m.id.startsWith("BAE5")) {
+                    if (db.data.chats[m.from]?.antidelete) {
+                        if (!db.data.chats[m.from].cache) db.data.chats[m.from].cache = [];
+                        db.data.chats[m.from].cache.push({ key: m.key, message: m.message, timestamp: Date.now() });
+                        db.data.chats[m.from].cache = db.data.chats[m.from].cache.filter(item => Date.now() - item.timestamp < 20 * 60 * 1000);
                     }
                 }
+                
                 for (const plugin of global.plugins) {
-                    const isCommand = !plugin.disable && plugin.comand ? (Array.isArray(plugin.comand) ? plugin.comand.includes(m.command) : plugin.comand.test(m.body)) : undefined
-
+                    const command = !plugin.disable && plugin.comand ? (Array.isArray(plugin.comand) ? plugin.comand.includes(m.command) : plugin.comand.test(m.body)) : undefined
+                    
                     if (plugin.isOwner && !m.isOwner) continue
-
+                    
                     try {
-                        if (plugin.exec && typeof plugin.exec === 'function' && isCommand) {
-                            let args = { sock, db, v: m.quoted ? m.quoted : m }
-
-                            await database(m, { sock, db })
+                        if (plugin.exec && typeof plugin.exec === 'function' && command) {
                             await plugin.exec.call(plugin, m, args)
                         }
                     } catch (error) {
