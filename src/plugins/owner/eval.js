@@ -1,5 +1,8 @@
 import { format } from "util"
 import axios  from 'axios'
+import baileys from '@al-e-dev/baileys'
+
+const { proto } = baileys
 
 export default {
     name: 'eval',
