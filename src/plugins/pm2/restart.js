@@ -1,10 +1,10 @@
 import { exec } from "child_process";
 
 export default {
-    name: 'pm2Restart',
+    name: 'restart',
     params: ['name'],
     desc: 'Reinicia un script con PM2',
-    comand: ['pm2restart'],
+    comand: ['restart'],
     exec: async (m, { sock }) => {
         exec(`pm2 restart ${m.text}`, (err, stdout, stderr) => {
             if (err) {

@@ -4,7 +4,7 @@ export default {
     name: 'stop',
     params: ['name'],
     desc: 'Detiene un script con PM2',
-    comand: ['pm2stop'],
+    comand: ['stop'],
     exec: async (m, { sock }) => {
         exec(`pm2 stop ${m.text}`, (err, stdout, stderr) => {
             if (err) {

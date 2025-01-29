@@ -1,10 +1,10 @@
 import { exec } from "child_process";
 
 export default {
-    name: 'pm2Logs',
+    name: 'logs',
     params: ['name'],
     desc: 'Obtiene los logs de un script con PM2',
-    comand: ['pm2logs'],
+    comand: ['logs'],
     exec: async (m, { sock }) => {
         exec(`pm2 logs ${m.text}`, (err, stdout, stderr) => {
             if (err) {

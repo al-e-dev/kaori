@@ -2,13 +2,13 @@ import Tiktok from "../../scraper/tiktok.js"
 
 export default {
     name: 'tiktok',
-    params: ['query', 'url'],
+    params: ['url'],
     description: 'Descarga o busca videos de TikTok',
     comand: ['tiktok'],
     exec: async (m, { sock }) => {
-        if (m.text.startsWith('https')) {
-            Tiktok.download(m.text)
-                .then(async ({ data }) => {
+        Tiktok.download(m.text)
+            .then(async ({ data }) => {
+                if (data.media.type === 'video') {
                     await sock.sendMessage(m.from, {
                         caption: data.title,
                         footer: _config.owner.name,
@@ -23,30 +23,33 @@ export default {
                         ],
                         headerType: 6,
                         viewOnce: true
-                    }, { quoted: m });
-                })
-                .catch(error => console.error('Error capturado:', error));
-        } else {
-            Tiktok.search(m.text)
-                .then(async ({ data }) => {
-                    const video = data[0];
-                    await sock.sendMessage(m.from, {
-                        caption: video.title,
-                        footer: _config.owner.name,
-                        video: { url: video.media.nowatermark },
-                        buttons: [
-                            {
-                                buttonId: "a",
-                                buttonText: {
-                                    displayText: 'Audio'
-                                }
+                    }, { quoted: m })
+
+                    sock.ev.on('messages.upsert', async ({ messages }) => {
+                        for (let msg of messages) {
+                            if (msg.message?.buttonsResponseMessage?.selectedButtonId === 'audio') {
+                                await sock.sendMessage(m.from, {
+                                    audio: { url: data.music.play },
+                                    mimetype: 'audio/mp4'
+                                }, { quoted: m })
+                                continue
                             }
-                        ],
-                        headerType: 6,
-                        viewOnce: true
-                    }, { quoted: m });
-                })
-                .catch(error => console.error('Error capturado:', error))
-        }
+                        }
+                    })
+
+                } else if (data.media.type === 'image') {
+                    for (let i of data.media.image) {
+                        await sock.sendMessage(m.from, {
+                            image: { url: i },
+                            caption: data.title
+                        }, { quoted: m })
+                    }
+                    await sock.sendMessage(m.from, {
+                        audio: { url: data.music.play },
+                        mimetype: 'audio/mp4'
+                    }, { quoted: m })
+                }
+            })
+            .catch(error => console.error('Error capturado:', error))
     }
 }

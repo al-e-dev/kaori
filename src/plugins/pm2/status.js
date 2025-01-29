@@ -1,10 +1,10 @@
 import { exec } from "child_process";
 
 export default {
-    name: 'pm2Status',
+    name: 'status',
     params: [],
     desc: 'Obtiene el estado de los scripts activos con PM2',
-    comand: ['pm2status'],
+    comand: ['status'],
     exec: async (m, { sock }) => {
         exec(`pm2 jlist`, (err, stdout) => {
             if (err) {
