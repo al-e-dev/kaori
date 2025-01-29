@@ -11,13 +11,13 @@ export default {
                 const buttons = data.map((item, index) => ({
                     buttonId: `tiktok_${index}`,
                     buttonText: { displayText: item.title },
-                    type: 1
                 }))
 
                 await sock.sendMessage(m.from, {
                     text: 'Resultados de búsqueda de TikTok:',
                     buttons: buttons,
-                    headerType: 1
+                    headerType: 6,
+                    viewOnce: true
                 }, { quoted: m })
 
                 sock.ev.on('messages.upsert', async ({ messages }) => {
