@@ -15,8 +15,8 @@ export default {
             footer: _config.owner.name,
             image: { url: video.thumbnail.url },
             buttons: [
-                { buttonId: 'audio', buttonText: { displayText: 'Audio' }, type: 1 },
-                { buttonId: 'video', buttonText: { displayText: 'Video' }, type: 1 }
+                { buttonId: 'audio', buttonText: { displayText: 'Audio' } },
+                { buttonId: 'video', buttonText: { displayText: 'Video' } }
             ],
             headerType: 6,
             viewOnce: true
