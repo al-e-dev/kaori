@@ -80,7 +80,7 @@ export default new class Tiktok {
                 headers: this.headers,
                 data: {
                     keywords: query,
-                    count: 10,
+                    count: 20,
                     cursor: 0,
                     hd: 1
                 }

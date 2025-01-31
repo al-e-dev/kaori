@@ -12,5 +12,6 @@ export default {
             await sock.sendMessage(m.from, { text: "No hay caché de mensajes eliminados para limpiar." })
         }
     },
-    isOwner: true
+    isOwner: true,
+    isGroup: true
 }

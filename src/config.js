@@ -11,7 +11,8 @@ global._config = {
     },
     bot: {
         name: "Dev's Ofc",
-        image: "./nazi.jpg"
+        image: "./nazi.jpg",
+        hd: "https://files.catbox.moe/kkdvjl.jpg"
     },
     mods: ['51968374620', '51979549311', '573013116003'],
     prefix: ['!', '?', '/', '.', '#'],

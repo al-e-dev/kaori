@@ -3,6 +3,7 @@ import axios  from 'axios'
 import baileys, {
     generateWAMessageFromContent
 } from '@al-e-dev/baileys'
+import YouTube from "../../scraper/youtube.js"
 
 const { proto } = baileys
 

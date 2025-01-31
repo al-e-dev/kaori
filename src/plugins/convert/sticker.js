@@ -3,6 +3,7 @@ export default {
     params: ['media'],
     desc: 'Convierte imagenes/videos en stickers',
     comand: ['sticker', 's'],
+    os: true,
     isMedia: true,
     exec: async (m, { sock, v }) => {
         await sock.sendSticker(m.from, {

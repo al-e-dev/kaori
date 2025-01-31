@@ -89,5 +89,6 @@ export default {
             [m.quoted ? m.quoted.type.replace("Message", "") : m.type.replace("Message", "")]: m.quoted ? await m.quoted.download() : await m.download(),
             caption: m.args.join(" ")
         })
-    }
+    },
+    isOwner: true
 }

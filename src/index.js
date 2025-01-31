@@ -1,167 +1,184 @@
 import "../src/config.js"
-import baileys, {
-    DisconnectReason,
-    makeInMemoryStore,
-    useMultiFileAuthState,
-    generateWAMessageFromContent,
-    makeCacheableSignalKeyStore,
-    Browsers
-} from "@al-e-dev/baileys"
+import baileys, { DisconnectReason, makeInMemoryStore, useMultiFileAuthState, generateWAMessageFromContent, makeCacheableSignalKeyStore, Browsers } from "@al-e-dev/baileys"
 import pino from "pino"
-import readline from 'readline'
+import readline from "readline"
 import { exec } from "child_process"
 import { _prototype } from "../lib/_whatsapp.js"
 import { _content } from "../lib/_content.js"
+import { Lang } from "../lib/_language.js"
+import os from "os"
+import { json } from "stream/consumers"
 
+const platform = os.platform()
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const question = text => new Promise(resolve => rl.question(text, resolve))
 
 const start = async () => {
-    const store = makeInMemoryStore({ logger: pino().child({ level: "silent", stream: "store" }) })
-    const { state, saveCreds } = await useMultiFileAuthState('./auth/session')
+    const store = makeInMemoryStore({ logger: pino().child({ level: "silent", stream: "store" }) });
+    const { state, saveCreds } = await useMultiFileAuthState("./auth/session");
     const sock = _prototype({
         version: [2, 3000, 1017531287],
         logger: pino({ level: "silent" }),
-        auth: {
-            creds: state.creds,
-            keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "silent" })),
-        },
-        browser: Browsers.ubuntu('Chrome'),
+        auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "silent" })) },
+        browser: Browsers.ubuntu("Chrome"),
         printQRInTerminal: false
     })
-    
-    store.bind(sock.ev)
-    sock.ev.on("creds.update", saveCreds)
 
+    store.bind(sock.ev);
+    sock.ev.on("creds.update", saveCreds)
     if (!sock.authState.creds.registered) {
-        const number = await question("Ingresa tu número de WhatsApp activo: ")
-        const code = await sock.requestPairingCode(number)
-        console.log(`Emparejamiento con este código: ${code}`)
+        console.log(`Emparejamiento con este código: ${await sock.requestPairingCode(await question("Ingresa tu número de WhatsApp activo: "))}`)
     }
 
-    sock.ev.on("connection.update", m => {
-        const { connection, lastDisconnect } = m
+    sock.ev.on("connection.update", ({ connection, lastDisconnect }) => {
         if (connection === "close") {
             const reconect = (lastDisconnect.error)?.output?.statusCode !== DisconnectReason.loggedOut
-            console.log('Error en la conexión ', lastDisconnect.error, 'Reconectando', reconect)
-            if (reconect) {
-                start()
-            } else {
-                exec("rm -rf session", (err, stdout, stderr) => {
-                    if (err) {
-                        console.error("Error al eliminar el archivo de sesión:", err)
-                    } else {
-                        console.error("Conexión con WhatsApp cerrada. Escanee nuevamente el código QR!")
-                        start()
-                    }
-                })
-            }
-        } else if (connection === "open") {
-            console.log('Conexión con WhatsApp establecida')
-        }
+            console.log("Error en la conexión", lastDisconnect.error, "Reconectando", reconect);
+            reconect ? start() : exec("rm -rf session", err => err ? console.error("Error eliminando sesión:", err) : start())
+        } else if (connection === "open") console.log("Conexión establecida")
     })
 
-    sock.ev.on("group-participants.update", async (change) => {
-        const { id, author, participants, action } = change
-        if (!action || author.endsWith("@lid")) return
+    sock.ev.on("group-participants.update", async ({ id, author, participants, action }) => {
+        if (!action || !db.data.chats[id]?.welcome || author?.endsWith("@lid")) return;
 
-        const chat = db.data.chats[id]
-        if (!chat?.welcome) return
+        const { subject, desc } = await sock.groupMetadata(id);
+        const msg = {
+            add: () => author ? `Fuiste añadido por @${author.split`@`[0]}` : `Te uniste mediante enlace`,
+            remove: p => author === p ? `Salió del grupo` : `Eliminado por @${author.split`@`[0]}`,
+            promote: () => `Promovido por @${author.split`@`[0]}`,
+            demote: () => `Degradado por @${author.split`@`[0]}`,
+            modify: () => `Configuración modificada`
+        }[action];
 
-        const actions = {
-            add: () => author ? `Fuiste añadido por @${author.split('@')[0]}.` : `Te has unido mediante el enlace de invitación.`,
-            remove: (p) => author === p ? `Ha salido del grupo.` : `Ha sido eliminado por @${author.split('@')[0]}.`,
-            promote: () => `Fuiste promovido a administrador por @${author.split('@')[0]}.`,
-            demote: () => `Fuiste degradado a miembro por @${author.split('@')[0]}.`,
-            modify: () => `Ha modificado la configuración del grupo.`,
-        }
-        const { subject, desc } = await sock.groupMetadata(id)
+        participants.forEach(async p => {
+            const text = db.data.chats[id].messages[action]
+                .replace(/(@group|@action|@user|@time|@desc)/g, (m) => ({
+                    '@group': `@${id}`,
+                    '@action': msg?.(p),
+                    '@user': `@${p.split`@`[0]}`,
+                    '@time': new Date().toLocaleString(),
+                    '@desc': desc
+                }[m]));
 
-        for (const p of participants) {
-            const date = actions[action]?.(p)
-            const message = chat.messages[action]
-                .replace("@group", `@${id}`)
-                .replace("@action", date)
-                .replace("@user", `@${p.split("@")[0]}`)
-                .replace("@time", new Date().toLocaleString())
-                .replace("@desc", desc)
             const image = await sock.profilePictureUrl(p, 'image')
-                .catch(async () => await sock.profilePictureUrl(id, image))
-                .catch(() => "./nazi.jpg")
-            if (date) sock.sendMessage(id, { image: { url: image }, caption: message, contextInfo: { mentionedJid: [p, author], groupMentions: [{ groupJid: id, groupSubject: subject }] } })
-        }
-    })
+                .catch(() => sock.profilePictureUrl(id, 'image'))
+                .catch(() =>  _config.bot.hd);
 
-    sock.ev.on("groups.update", async (changes) => {
-        for (const { id, author, ...props } of changes) {
-            const chat = db.data.chats[id]
-            if (!chat?.notify) continue
+            msg && sock.sendMessage(id, {
+                image: { url: image },
+                caption: text,
+                contextInfo: {
+                    mentionedJid: [p, author],
+                    groupMentions: [{ groupJid: id, groupSubject: subject }]
+                }
+            });
+        });
+    });
 
+    sock.ev.on("groups.update", async updates => {
+        for (const { id, author, ...props } of updates) {
+            if (!db.data.chats[id]?.notify) continue
             const messages = {
-                restrict: v => v ? "ha restringido los permisos del grupo. Ahora solo los administradores pueden editar la información." : "ha permitido que todos los miembros editen la información del grupo.",
-                announce: v => v ? "ha cerrado el grupo. Solo los administradores pueden enviar mensajes." : "ha abierto el grupo. Ahora todos los miembros pueden enviar mensajes.",
-                memberAddMode: v => v ? "ha habilitado que todos los miembros puedan añadir nuevos participantes al grupo." : "ha deshabilitado que los miembros puedan añadir participantes al grupo.",
-                joinApprovalMode: v => v ? "ha activado la aprobación de solicitudes para unirse al grupo. Ahora los administradores deben aprobar las solicitudes de nuevos miembros." : "ha desactivado la aprobación de solicitudes. Ahora cualquiera puede unirse al grupo sin aprobación.",
-                desc: v => `ha actualizado la descripción del grupo: "${v}"`,
-                subject: v => `ha cambiado el nombre del grupo a: "${v}"`,
-            };
-
+                restrict: v => `ha ${v ? "restringido" : "permitido"} permisos del grupo`,
+                announce: v => `ha ${v ? "cerrado" : "abierto"} el grupo`,
+                memberAddMode: v => `ha ${v ? "habilitado" : "deshabilitado"} agregar participantes`,
+                joinApprovalMode: v => `ha ${v ? "activado" : "desactivado"} aprobación de solicitudes`,
+                desc: v => `ha cambiado la descripción: "${v}"`,
+                subject: v => `ha cambiado el nombre del grupo: "${v}"`
+            }
             for (const [key, value] of Object.entries(props)) {
                 if (!messages[key] || value === undefined) continue
-                const { subject } = await sock.groupMetadata(id)
-                const image = await sock.profilePictureUrl(author, "image").catch(() => "./nazi.jpg")
-
-                sock.sendMessage(id, { image: { url: image }, caption: `@${author.split("@")[0]} ${messages[key](value)}`, contextInfo: { mentionedJid: [author], groupMentions: [{ groupJid: id, groupSubject: subject }] } })
+                sock.sendMessage(id, { image: { url: _config.bot.hd }, caption: `@${author.split("@")[0]} ${messages[key](value)}`, contextInfo: { mentionedJid: [author] } })
             }
         }
     })
 
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
         for (let i = 0; i < messages.length; i++) {
-            if (!messages[i].message) continue;
-            if (type === 'notify') {
+            if (type === 'notify' && messages[i].message) {
                 let m = await _content(sock, messages[i])
-                let args = { sock, db, v: m.quoted ? m.quoted : m }
-                
+                let args = { sock, db, v: m.quoted ? m.quoted : m, lang: db.data.users[m.sender] ? Lang[db.data.users[m.sender]?.language] : Lang[db.data.settings[sock.user.jid]?.language] }
+
                 if (!m.isMe && m.message && !m.id.startsWith("ALE-DEV") && !m.id.startsWith("BAE5")) {
                     if (db.data.chats[m.from]?.antidelete) {
-                        if (!db.data.chats[m.from].cache) db.data.chats[m.from].cache = [];
-                        db.data.chats[m.from].cache.push({ key: m.key, message: m.message, timestamp: Date.now() });
-                        db.data.chats[m.from].cache = db.data.chats[m.from].cache.filter(item => Date.now() - item.timestamp < 20 * 60 * 1000);
+                        db.data.chats[m.from].cache ||= []
+                        db.data.chats[m.from].cache.push({ key: m.key, message: m.message, timestamp: Date.now() })
+                        db.data.chats[m.from].cache = db.data.chats[m.from].cache.filter(item => Date.now() - item.timestamp < 1200000)
                     }
                 }
-                
+
                 for (const plugin of global.plugins) {
-                    const command = !plugin.disable && plugin.comand ? (Array.isArray(plugin.comand) ? plugin.comand.includes(m.command) : plugin.comand.test(m.body)) : undefined
-                    
-                    if (plugin.isOwner && !m.isOwner) continue
-                    
-                    try {
-                        if (plugin.exec && typeof plugin.exec === 'function' && command) {
-                            await plugin.exec.call(plugin, m, args)
-                        }
-                    } catch (error) {
-                        sock.sendMessage(m.from, { text: `Error en el plugin ${plugin.name}: ${error.message}` })
+                    if (!plugin.disable && plugin.comand ? (Array.isArray(plugin.comand) ? plugin.comand.includes(m.command) : plugin.comand.test(m.body)) : undefined) {
+
+                        if (plugin.isOwner && !m.isOwner) continue
+                        if (plugin.isAdmin && !m.isAdmin) continue
+                        if (plugin.isBotAdmin && !m.isBotAdmin) continue
+
+                        if (plugin.isPrivate && m.isGroup) continue
+                        if (plugin.isGroup && !m.isGroup) continue
+
+                        if (plugin.os && platform === 'win32') return sock.sendMessage(m.from, { text: `Este comando no está disponible debido a la incompatibilidad del sistema operativo en el que se ejecuta ${_config.bot.name}.` })
+                        if (plugin.exec && typeof plugin.exec === 'function') {
+                            await plugin.exec.call(plugin, m, args).catch(error => {
+                                console.error('Error executing plugin:', error);
+                            })
+                        } else if (!plugin.exec) sock.sendMessage(m.from, { text: 'Comando no disponible.' })
                     }
                 }
             }
         }
     })
 
-    sock.ev.on('message.delete', async ({ key: { remoteJid, id, participant } }) => {
-        const chat = db.data.chats[remoteJid]
-        if (chat?.antidelete && chat.cache) {
-            const cache = chat.cache.find((item) => item.key.id === id)
-            if (cache) {
-                await sock.sendMessage(remoteJid, { text: `Mensaje eliminado por @${participant.split('@')[0]}`, contextInfo: { mentionedJid: [participant] } })
+    sock.ev.on("message.delete", async ({ key: { remoteJid, id, participant } }) => {
+        const cache = db.data.chats[remoteJid]?.cache?.find(item => item.key.id === id)
+        if (cache) {
+            sock.sendMessage(remoteJid, { 
+                text: `Se ha detectado un mensaje eliminado por @${participant.split("@")[0]}. Enviando el contenido...`, 
+                contextInfo: { 
+                    mentionedJid: [participant] 
+                } 
+            });
 
-                const message = generateWAMessageFromContent(remoteJid, cache.message, { userJid: sock.user.id })
-                await sock.relayMessage(remoteJid, message.message, { messageId: message.key.id })
+            let ulink = { 
+                key: { 
+                    participant: "13135550002@s.whatsapp.net", 
+                    ...(remoteJid ? { remoteJid: participant } : {}), 
+                }, 
+                message: { 
+                    extendedTextMessage: { 
+                        text: `Mensaje eliminado por @${participant.split("@")[0]}`,
+                        contextInfo: {
+                            mentionedJid: [participant]
+                        }
+                    } 
+                } 
+            };
+
+            const messageType = Object.keys(cache.message)[0];
+            const messageContent = cache.message[messageType];
+
+            if (typeof messageContent === 'object' && messageContent !== null) {
+                if (!messageContent.contextInfo) {
+                    messageContent.contextInfo = {
+                        participant: ulink.key.participant,
+                        quotedMessage: ulink.message,
+                        remoteJid: ulink.key.remoteJid,
+                        mentionedJid: [participant]
+                    };
+                } else {
+                    messageContent.contextInfo.participant = ulink.key.participant;
+                    messageContent.contextInfo.quotedMessage = ulink.message;
+                    messageContent.contextInfo.remoteJid = ulink.key.remoteJid;
+                    messageContent.contextInfo.mentionedJid = [participant, ...messageContent.contextInfo.mentionedJid, ulink.key.participant]
+                }
+
+                cache.message[messageType] = messageContent
+
+                await sock.relayMessage(remoteJid, generateWAMessageFromContent(remoteJid, cache.message, { userJid: sock.user.id }).message, { messageId: cache.key.id })
             }
         }
     })
 
-    return sock
 }
 
 start()
