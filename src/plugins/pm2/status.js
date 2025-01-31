@@ -1,3 +1,4 @@
+import { convertTimeOut } from "@al-e-dev/baileys";
 import { exec } from "child_process";
 
 export default {
@@ -20,7 +21,7 @@ export default {
                 const eventLoopLatencyP50 = axm_monitor['Event Loop Latency']?.value || 'N/A';
                 const eventLoopLatencyP95 = axm_monitor['Event Loop Latency p95']?.value || 'N/A';
 
-                return `Nombre: ${name}\nID: ${pm_id}\nPID: ${pid}\nEstado: ${status}\nCPU: ${cpu}%\nMemoria: ${memory} MB\nTiempo de actividad: ${uptime} segundos\nReinicios: ${restart_time}\nVersión de Node.js: ${node_version}\nVersión de la aplicación: ${version}\nRuta del script: ${pm_exec_path}\nRepositorio: ${versioning.url}\nRama: ${versioning.branch}\nErrores recientes: ${error || 'Ninguno'}\nLatencia del Event Loop (p50): ${eventLoopLatencyP50} ms\nLatencia del Event Loop (p95): ${eventLoopLatencyP95} ms`;
+                return `Name: ${name}\nID: ${pm_id}\nPID: ${pid}\Status: ${status}\nCPU: ${cpu}%\Memory: ${memory} MB\nActivity: ${convertTimeOut(uptime)}\Restarts: ${restart_time}\nNode.js: ${node_version}\nVersion: ${version}\nLatencia (p50): ${eventLoopLatencyP50} ms\nLatencia (p95): ${eventLoopLatencyP95} ms`;
             }).join('\n\n')
 
             sock.sendMessage(m.from, { text: `Estado:\n${detailedOutput}` }, { quoted: m });
