@@ -21,7 +21,7 @@ export default {
                 const eventLoopLatencyP50 = axm_monitor['Event Loop Latency']?.value || 'N/A';
                 const eventLoopLatencyP95 = axm_monitor['Event Loop Latency p95']?.value || 'N/A';
 
-                return `Name: ${name}\nID: ${pm_id}\nPID: ${pid}\Status: ${status}\nCPU: ${cpu}%\Memory: ${memory} MB\nActivity: ${convertTimeOut(uptime)}\nRestarts: ${restart_time}\nNode.js: ${node_version}\nVersion: ${version}\nLatencia (p50): ${eventLoopLatencyP50} ms\nLatencia (p95): ${eventLoopLatencyP95} ms`;
+                return `Name: ${name}\nID: ${pm_id}\nPID: ${pid}\nStatus: ${status}\nCPU: ${cpu}%\nMemory: ${memory} MB\nActivity: ${convertTimeOut(uptime)}\nNode.js: ${node_version}\nVersion: ${version}\nLatencia (p50): ${eventLoopLatencyP50} ms\nLatencia (p95): ${eventLoopLatencyP95} ms`;
             }).join('\n\n')
 
             sock.sendMessage(m.from, { text: `Estado:\n${detailedOutput}` }, { quoted: m });
