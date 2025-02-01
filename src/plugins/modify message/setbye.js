@@ -1,7 +1,7 @@
 export default {
     name: 'setbye',
     params: ['message'],
-    desc: 'Modificar el mensaje de despedida',
+    description: 'Modificar el mensaje de despedida',
     comand: ['setbye'],
     exec: async (m, { sock, db }) => {
         if (!m.isOwner) return sock.sendMessage(m.from, { text: 'Este comando solo puede ser usado por el propietario.' });

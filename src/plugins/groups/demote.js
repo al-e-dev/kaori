@@ -1,7 +1,7 @@
 export default {
     name: 'demote',
     params: ['number'],
-    desc: 'Degradar miembro de administrador',
+    description: 'Degradar miembro de administrador',
     comand: ['demote'],
     exec: async (m, { sock }) => {
         const user = m.quoted ? m.quoted.sender : (m.mentionedJid.length ? m.mentionedJid[0] : m.args.join(" ").replace(/[^0-9]/g, '') + '@s.whatsapp.net');
@@ -15,5 +15,8 @@ export default {
             text: `Usuario ${user.split("@")[0]} degradado con éxito.`,
             mentions: [...admins, user]
         }, { quoted: m });
-    }
-};
+    },
+    isAdmin: true,
+    isBotAdmin: true,
+    isGroup: true
+}

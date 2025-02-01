@@ -1,7 +1,7 @@
 export default {
     name: 'setdemote',
     params: ['message'],
-    desc: 'Modificar el mensaje de degradación',
+    description: 'Modificar el mensaje de degradación',
     comand: ['setdemote'],
     exec: async (m, { sock, db }) => {
         if (!m.isOwner) return sock.sendMessage(m.from, { text: 'Este comando solo puede ser usado por el propietario.' });

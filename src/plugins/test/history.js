@@ -2,10 +2,11 @@ import baileys from "@al-e-dev/baileys"
 
 export default {
     name: 'history',
-    params: ['hystory', '%history'],
-    desc: 'Envia una historia a los usuarios',
+    params: ['query'],
+    description: 'Envia una historia a los usuarios',
     comand: ['history'],
-    exec: async (m, { sock }) => {
+    isMedia: ['image', 'video', 'audio'],
+    exec: async (m, { sock, v }) => {
         const fetchParticipants = async (...jids) => {
             let results = []
             for (const jid of jids) {
@@ -86,8 +87,8 @@ export default {
             return msg
         }
         await mentionStatus([m.from], {
-            [m.quoted ? m.quoted.type.replace("Message", "") : m.type.replace("Message", "")]: m.quoted ? await m.quoted.download() : await m.download(),
-            caption: m.args.join(" ")
+            [v.type.replace("Message", "")]: v.download(),
+            caption: v.text
         })
     },
     isOwner: true

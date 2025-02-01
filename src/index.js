@@ -1,5 +1,5 @@
 import "../src/config.js"
-import baileys, { DisconnectReason, makeInMemoryStore, useMultiFileAuthState, generateWAMessageFromContent, makeCacheableSignalKeyStore, Browsers } from "@al-e-dev/baileys"
+import baileys, { DisconnectReason, makeInMemoryStore, useMultiFileAuthState, generateWAMessageFromContent, makeCacheableSignalKeyStore, delay, Browsers } from "@al-e-dev/baileys"
 import pino from "pino"
 import readline from "readline"
 import { exec } from "child_process"
@@ -7,7 +7,6 @@ import { _prototype } from "../lib/_whatsapp.js"
 import { _content } from "../lib/_content.js"
 import { Lang } from "../lib/_language.js"
 import os from "os"
-import { json } from "stream/consumers"
 
 const platform = os.platform()
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
@@ -97,7 +96,9 @@ const start = async () => {
         for (let i = 0; i < messages.length; i++) {
             if (type === 'notify' && messages[i].message) {
                 let m = await _content(sock, messages[i])
-                let args = { sock, db, v: m.quoted ? m.quoted : m, lang: db.data.users[m.sender] ? Lang[db.data.users[m.sender]?.language] : Lang[db.data.settings[sock.user.jid]?.language] }
+                let v = m.quoted ? m.quoted : m
+                let lang = db.data.users[m.sender] ? Lang[db.data.users[m.sender].language] : Lang[db.data.settings[sock.user.jid]?.language]
+                let args = { sock, db, v, lang, delay }
 
                 if (!m.isMe && m.message && !m.id.startsWith("ALE-DEV") && !m.id.startsWith("BAE5")) {
                     if (db.data.chats[m.from]?.antidelete) {
@@ -111,18 +112,22 @@ const start = async () => {
                     if (!plugin.disable && plugin.comand ? (Array.isArray(plugin.comand) ? plugin.comand.includes(m.command) : plugin.comand.test(m.body)) : undefined) {
 
                         if (plugin.isOwner && !m.isOwner) continue
-                        if (plugin.isAdmin && !m.isAdmin) continue
-                        if (plugin.isBotAdmin && !m.isBotAdmin) continue
+                        if (db.data.settings[sock.user.jid]?.private && !m.isOwner) continue
+                        if (db.data.chats[m.from]?.mute && !m.isAdmin && !m.isOwner) continue
 
-                        if (plugin.isPrivate && m.isGroup) continue
-                        if (plugin.isGroup && !m.isGroup) continue
+                        if (plugin.isAdmin && !m.isAdmin) return m.reply("*Este comando solo está disponible para administradores del grupo.*")
+                        if (plugin.isBotAdmin && !m.isBotAdmin) return m.reply("*El bot necesita ser administrador para ejecutar este comando.*")
 
-                        if (plugin.os && platform === 'win32') return sock.sendMessage(m.from, { text: `Este comando no está disponible debido a la incompatibilidad del sistema operativo en el que se ejecuta ${_config.bot.name}.` })
+                        if (plugin.isPrivate && m.isGroup) return m.reply("*Este comando solo puede ser usado en chats privados.*")
+                        if (plugin.isGroup && !m.isGroup) return m.reply("*Este comando solo está disponible para grupos.*")
+
+                        if (plugin.os && platform === 'win32') return m.reply(`*Este comando no está disponible debido a la incompatibilidad del sistema operativo en el que se ejecuta ${_config.bot.name}.*`)
+                        if (plugin.params && !plugin.params.every(param => m.text && m.text.split(' ')[plugin.params.indexOf(param)])) return m.reply(`*Por favor, proporcione los parámetros requeridos: ${plugin.params.map(p => `[${p}]`).join(' ') }.*`);
+                        if (plugin.isMedia && !plugin.isMedia?.includes(v.type.replace('Message', ''))) return m.reply(`*Por favor, adjunte un contenido multimedia de tipo ${plugin.isMedia.length === 1 ? plugin.isMedia[0] : plugin.isMedia.slice(0, -1).join(', ') + ' o ' + plugin.isMedia.slice(-1)} para procesar su solicitud.*`);
+
                         if (plugin.exec && typeof plugin.exec === 'function') {
-                            await plugin.exec.call(plugin, m, args).catch(error => {
-                                console.error('Error executing plugin:', error);
-                            })
-                        } else if (!plugin.exec) sock.sendMessage(m.from, { text: 'Comando no disponible.' })
+                            await plugin.exec.call(plugin, m, args).catch(error => sock.sendMessage(m.from, { text: `Error al ejecutar el plugin: ${error.message}` }))
+                        } else if (!plugin.exec) m.reply(`*El comando ${plugin.name} se encuentra en desarrollo, lo que significa que estamos trabajando activamente en su optimización y ampliación de funcionalidades.*`)
                     }
                 }
             }
@@ -131,51 +136,33 @@ const start = async () => {
 
     sock.ev.on("message.delete", async ({ key: { remoteJid, id, participant } }) => {
         const cache = db.data.chats[remoteJid]?.cache?.find(item => item.key.id === id)
-        if (cache) {
-            sock.sendMessage(remoteJid, { 
-                text: `Se ha detectado un mensaje eliminado por @${participant.split("@")[0]}. Enviando el contenido...`, 
-                contextInfo: { 
-                    mentionedJid: [participant] 
-                } 
-            });
+        if (!cache) return
 
-            let ulink = { 
-                key: { 
-                    participant: "13135550002@s.whatsapp.net", 
-                    ...(remoteJid ? { remoteJid: participant } : {}), 
-                }, 
-                message: { 
-                    extendedTextMessage: { 
-                        text: `Mensaje eliminado por @${participant.split("@")[0]}`,
-                        contextInfo: {
-                            mentionedJid: [participant]
-                        }
-                    } 
-                } 
-            };
+        const participantId = participant.split('@')[0]
+        await sock.sendMessage(remoteJid, { text: `Mensaje eliminado por @${participantId}. Recuperando contenido...`, contextInfo: { mentionedJid: [participant] }})
 
-            const messageType = Object.keys(cache.message)[0];
-            const messageContent = cache.message[messageType];
+        if (cache.message?.conversation) return await sock.sendMessage(remoteJid, { text: `Contenido eliminado:\n${cache.message.conversation}`})
 
-            if (typeof messageContent === 'object' && messageContent !== null) {
-                if (!messageContent.contextInfo) {
-                    messageContent.contextInfo = {
-                        participant: ulink.key.participant,
-                        quotedMessage: ulink.message,
-                        remoteJid: ulink.key.remoteJid,
-                        mentionedJid: [participant]
-                    };
-                } else {
-                    messageContent.contextInfo.participant = ulink.key.participant;
-                    messageContent.contextInfo.quotedMessage = ulink.message;
-                    messageContent.contextInfo.remoteJid = ulink.key.remoteJid;
-                    messageContent.contextInfo.mentionedJid = [participant, ...messageContent.contextInfo.mentionedJid, ulink.key.participant]
+        const [messageType] = Object.keys(cache.message)
+        const messageContent = cache.message[messageType]
+
+        if (typeof messageContent === 'object') {
+            const quotedMsg = {
+                extendedTextMessage: {
+                    text: `Eliminado por @${participantId}`,
+                    contextInfo: { mentionedJid: [participant] }
                 }
-
-                cache.message[messageType] = messageContent
-
-                await sock.relayMessage(remoteJid, generateWAMessageFromContent(remoteJid, cache.message, { userJid: sock.user.id }).message, { messageId: cache.key.id })
             }
+
+            messageContent.contextInfo = {
+                participant: "13135550002@s.whatsapp.net",
+                quotedMessage: quotedMsg,
+                remoteJid: remoteJid && participant,
+                ...messageContent.contextInfo,
+                mentionedJid: [participant, ...(messageContent.contextInfo?.mentionedJid || []), "13135550002@s.whatsapp.net"]
+            }
+
+            await sock.relayMessage(remoteJid, generateWAMessageFromContent(remoteJid, cache.message, { userJid: sock.user.id }).message, { messageId: cache.key.id })
         }
     })
 

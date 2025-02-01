@@ -2,8 +2,8 @@ import { exec } from 'child_process'
 
 export default {
     name: 'exec',
-    params: ['exec'],
-    desc: 'exec',
+    params: [],
+    description: 'exec',
     comand: /^\$/,
     exec: async (m, { sock }) => {
         exec(m.text, (error, stdout, stderr) => {

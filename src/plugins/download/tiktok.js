@@ -4,7 +4,7 @@ export default {
     name: 'tiktok',
     params: ['url'],
     description: 'Descarga o busca videos de TikTok',
-    comand: ['tiktok'],
+    comand: ['tiktok', 'tt'],
     exec: async (m, { sock }) => {
         Tiktok.download(m.text)
             .then(async ({ data }) => {

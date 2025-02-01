@@ -1,21 +1,25 @@
+import axios from 'axios';
+
 export default {
     name: 'gitclone',
-    params: ['<url>'],
+    params: ['url'],
     desc: 'Clona un repositorio de GitHub',
     comand: ['gitclone'],
     exec: async (m, { sock }) => {
-        const url = m.text
+        const url = `https://api.github.com/repos/${m.text.split('/').slice(-2).join('/')}`
 
-        const [user, repo] = url.match(/(?:https|git)(?::\/\/|@)github\.com[:\/](.+?)\/(.+?)(?:\.git|$)/i) || []
-        const gitUrl = `https://api.github.com/repos/${user}/${repo.replace('.git', '')}/zipball`
-        const { headers } = await fetch(gitUrl, { method: 'HEAD' })
-        const filename = headers.get('content-disposition')?.match(/filename=(.*)/)[1]
+        const { full_name, description, stargazers_count, forks_count } = (await axios.get(url)).data
 
         await sock.sendMessage(m.from, {
-            document: { url: gitUrl },
-            fileName: `${filename}.zip`,
-            mimetype: 'application/zip'
+            text: `Repositorio: ${full_name}\nDescripción: ${description}\nEstrellas: ${stargazers_count}\nForks: ${forks_count}`
         }, { quoted: m })
 
+        await sock.sendMessage(m.from, {    
+            document: {
+                url: `${url}/zipball`
+            },
+            fileName: full_name + '.zip',
+            mimetype: 'application/zip'
+        }, { quoted: m })
     }
 }

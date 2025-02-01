@@ -1,7 +1,7 @@
 export default {
     name: 'stickerpack',
     params: ['stickerpack', '%stickerpack'],
-    desc: 'paquete de sticker',
+    description: 'paquete de sticker',
     comand: ['stickerpack'],
     exec: async (m, { sock }) => {
         await sock.relayMessage(m.from, {

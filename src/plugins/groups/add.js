@@ -1,7 +1,7 @@
 export default {
     name: 'add',
     params: ['number'],
-    desc: 'Añadir miembro al grupo',
+    description: 'Añadir miembro al grupo',
     comand: ['add'],
     exec: async (m, { sock }) => {
         const users = m.mentionedJid?.length ? m.mentionedJid : [m.args.join``.replace(/\D/g, '') + '@s.whatsapp.net'];
@@ -27,5 +27,8 @@ export default {
         }[status];
 
         typeof msg === 'function' ? await msg() : msg && await sock.sendMessage(m.from, { text: msg }, { quoted: m });
-    }
-};
+    },
+    isAdmin: true,
+    isBotAdmin: true,
+    isGroup: true
+}

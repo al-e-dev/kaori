@@ -1,7 +1,7 @@
 export default {
     name: 'remove',
     params: ['number'],
-    desc: 'Eliminar miembro del grupo',
+    description: 'Eliminar miembro del grupo',
     comand: ['remove'],
     exec: async (m, { sock }) => {
         const users = m.mentionedJid.length ? m.mentionedJid : [m.args.join(" ").replace(/[^0-9]/g, '') + '@s.whatsapp.net']
@@ -13,5 +13,8 @@ export default {
 
         await sock.groupParticipantsUpdate(m.from, users, "remove");
         await sock.sendMessage(m.from, { text: `Usuarios eliminados con éxito.`, mentions: users }, { quoted: m });
-    }
-};
+    },
+    isAdmin: true,
+    isBotAdmin: true,
+    isGroup: true
+}

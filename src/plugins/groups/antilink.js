@@ -1,7 +1,7 @@
 export default {
     name: 'antilink',
     params: ['on/off'],
-    desc: 'Habilitar o deshabilitar antilink',
+    description: 'Habilitar o deshabilitar antilink',
     comand: ['antilink'],
     exec: async (m, { sock, db }) => {
         if (!m.isOwner) return sock.sendMessage(m.from, { text: 'Este comando solo puede ser usado por el propietario.' });
@@ -19,5 +19,7 @@ export default {
         } else {
             await sock.sendMessage(m.from, { text: 'Opción inválida.' });
         }
-    }
-};
+    },
+    isAdmin: true,
+    isGroup: true
+}

@@ -1,7 +1,7 @@
 export default {
     name: 'promote',
     params: ['number'],
-    desc: 'Promover miembro a administrador',
+    description: 'Promover miembro a administrador',
     comand: ['promote'],
     exec: async (m, { sock }) => {
         const users = m.quoted ? [m.quoted.sender] : (m.mentionedJid.length ? m.mentionedJid : [m.args.join(" ").replace(/[^0-9]/g, '') + '@s.whatsapp.net']);
@@ -17,5 +17,8 @@ export default {
             text: `Usuarios promovidos con éxito.`,
             mentions: [...admins, ...validUsers]
         }, { quoted: m });
-    }
+    },
+    isAdmin: true,
+    isBotAdmin: true,
+    isGroup: true
 };

@@ -1,7 +1,7 @@
 export default {
     name: 'clear cache',
     params: ['random', '%comand'],
-    desc: 'Carga el menu de comandos',
+    description: 'Carga el menu de comandos',
     comand: ['clear'],
     exec: async (m, { sock, db }) => {
         const chat = db.data.chats[m.from]
@@ -12,6 +12,6 @@ export default {
             await sock.sendMessage(m.from, { text: "No hay caché de mensajes eliminados para limpiar." })
         }
     },
-    isOwner: true,
+    isAdmin: true,
     isGroup: true
 }

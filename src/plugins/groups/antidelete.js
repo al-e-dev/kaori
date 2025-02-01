@@ -1,7 +1,7 @@
 export default {
     name: 'antidelete',
     params: ['on/off'],
-    desc: 'Habilitar o deshabilitar antidelete',
+    description: 'Habilitar o deshabilitar antidelete',
     comand: ['antidelete'],
     exec: async (m, { sock, db }) => {
         if (!m.isOwner) return sock.sendMessage(m.from, { text: 'Este comando solo puede ser usado por el propietario.' });
@@ -19,5 +19,7 @@ export default {
         } else {
             await sock.sendMessage(m.from, { text: 'Opción inválida.' });
         }
-    }
-};
+    },
+    isAdmin: true,
+    isGroup: true
+}

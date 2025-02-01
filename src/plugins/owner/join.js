@@ -1,7 +1,7 @@
 export default {
     name: 'join',
     params: ['url'],
-    desc: 'Unirse a un grupo mediante un enlace de invitación',
+    description: 'Unirse a un grupo mediante un enlace de invitación',
     comand: ['join', 'unirse'],
     isOwner: true,
     exec: async (m, { sock }) => {

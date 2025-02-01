@@ -1,7 +1,7 @@
 export default {
     name: 'group',
     params: ['action'],
-    desc: 'Gestionar configuraciones del grupo',
+    description: 'Gestionar configuraciones del grupo',
     comand: ['group', 'gp'],
     exec: async (m, { sock }) => {
         if (!m.isBotAdmin) return sock.sendMessage(m.from, { text: 'El bot no es administrador.' }, { quoted: m });
@@ -29,5 +29,8 @@ export default {
         } else {
             await sock.sendMessage(m.from, { text: 'Uso: .group <cerrar/abrir/edit/noedit>' }, { quoted: m });
         }
-    }
-};
+    },
+    isAdmin: true,
+    isBotAdmin: true,
+    isGroup: true
+}

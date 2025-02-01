@@ -1,7 +1,7 @@
 export default {
     name: 'setpromote',
     params: ['message'],
-    desc: 'Modificar el mensaje de promoción',
+    description: 'Modificar el mensaje de promoción',
     comand: ['setpromote'],
     exec: async (m, { sock, db }) => {
         if (!m.isOwner) return sock.sendMessage(m.from, { text: 'Este comando solo puede ser usado por el propietario.' });

@@ -1,7 +1,7 @@
 export default {
     name: 'setmodify',
     params: ['message'],
-    desc: 'Modificar el mensaje de modificación',
+    description: 'Modificar el mensaje de modificación',
     comand: ['setmodify'],
     exec: async (m, { sock, db }) => {
         if (!m.isOwner) return sock.sendMessage(m.from, { text: 'Este comando solo puede ser usado por el propietario.' });

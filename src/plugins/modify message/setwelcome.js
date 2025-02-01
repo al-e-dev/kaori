@@ -1,7 +1,7 @@
 export default {
     name: 'setwelcome',
     params: ['message'],
-    desc: 'Modificar el mensaje de bienvenida',
+    description: 'Modificar el mensaje de bienvenida',
     comand: ['setwelcome'],
     exec: async (m, { sock, db }) => {
         if (!m.isOwner) return sock.sendMessage(m.from, { text: 'Este comando solo puede ser usado por el propietario.' });

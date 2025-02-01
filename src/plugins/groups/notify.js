@@ -1,7 +1,7 @@
 export default {
     name: 'notify',
     params: ['activar', 'desactivar', 'on', 'off'],
-    desc: 'Activa o desactiva las notificaciones en el grupo',
+    description: 'Activa o desactiva las notificaciones en el grupo',
     comand: ['notify'],
     exec: async (m, { sock, db }) => {
         const [action] = m.args;
@@ -12,5 +12,6 @@ export default {
         const chat = db.data.chats[m.from];
         chat.notify = action === 'activar' || action === 'on' ? true : false;
         await sock.sendMessage(m.from, { text: `Notificaciones ${chat.notify ? 'activadas' : 'desactivadas'}` }, { quoted: m });
-    }
-};
+    },
+    isGroup: true
+}

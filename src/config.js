@@ -7,12 +7,14 @@ global.origen = path.dirname(fileURLToPath(import.meta.url))
 global._config = {
     owner: {
         number: "573234097278",
-        name: "Ale Devs"
+        name: "Pineda",
+        img: "https://files.catbox.moe/3m9yzl.jpg"
     },
     bot: {
-        name: "Dev's Ofc",
-        image: "./nazi.jpg",
-        hd: "https://files.catbox.moe/kkdvjl.jpg"
+        name: "Nazi Bot",
+        version: "1.0",
+        hd: "https://files.catbox.moe/kkdvjl.jpg",
+        img: "https://files.catbox.moe/ahdtgk.jpg"
     },
     mods: ['51968374620', '51979549311', '573013116003'],
     prefix: ['!', '?', '/', '.', '#'],
