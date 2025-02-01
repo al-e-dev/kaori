@@ -16,7 +16,9 @@ export default {
                 .filter(f => f.endsWith('.js'))
                 .map(async f => {
                     const { default: cmd } = await import(pathToFileURL(path.join(__dirname, cat, f)).href)
-                    return `.${cmd.name}`
+                    const paramCount = cmd.params?.length || 0
+                    const params = paramCount ? (paramCount >= 2 ? '<query/url>' : '<query>') : ''
+                    return `.${cmd.name}${params ? ' ' + params : ''}`
                 }));
             return cmds.length ? `${cat}:\n${cmds.join('\n')}\n` : ''
         }))).filter(Boolean).join('\n')
