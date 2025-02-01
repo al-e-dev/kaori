@@ -1,7 +1,7 @@
 export default {
-    name: 'clear cache',
-    params: ['random', '%comand'],
-    description: 'Carga el menu de comandos',
+    name: 'clear',
+    params: [],
+    description: 'Elimina la Cache',
     comand: ['clear'],
     exec: async (m, { sock, db }) => {
         const chat = db.data.chats[m.from]
