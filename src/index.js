@@ -14,10 +14,8 @@ const question = text => new Promise(resolve => rl.question(text, resolve))
 
 const start = async () => {
     const store = makeInMemoryStore({ logger: pino().child({ level: "silent", stream: "store" }) })
-    const { version } = fetchLatestBaileysVersion()
     const { state, saveCreds } = await useMultiFileAuthState("./auth/session");
     const sock = _prototype({
-        version,
         logger: pino({ level: "silent" }),
         auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "silent" })) },
         browser: Browsers.ubuntu("Chrome"),
@@ -62,7 +60,7 @@ const start = async () => {
 
             const image = await sock.profilePictureUrl(p, 'image')
                 .catch(() => sock.profilePictureUrl(id, 'image'))
-                .catch(() =>  _config.bot.hd);
+                .catch(() => _config.bot.hd);
 
             msg && sock.sendMessage(id, {
                 image: { url: image },
@@ -140,9 +138,9 @@ const start = async () => {
         if (!cache) return
 
         const participantId = participant.split('@')[0]
-        await sock.sendMessage(remoteJid, { text: `Mensaje eliminado por @${participantId}. Recuperando contenido...`, contextInfo: { mentionedJid: [participant] }})
+        await sock.sendMessage(remoteJid, { text: `Mensaje eliminado por @${participantId}. Recuperando contenido...`, contextInfo: { mentionedJid: [participant] } })
 
-        if (cache.message?.conversation) return await sock.sendMessage(remoteJid, { text: `Contenido eliminado:\n${cache.message.conversation}`})
+        if (cache.message?.conversation) return await sock.sendMessage(remoteJid, { text: `Contenido eliminado:\n${cache.message.conversation}` })
 
         const [messageType] = Object.keys(cache.message)
         const messageContent = cache.message[messageType]
