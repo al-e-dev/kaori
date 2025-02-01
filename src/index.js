@@ -1,5 +1,5 @@
 import "../src/config.js"
-import baileys, { DisconnectReason, makeInMemoryStore, useMultiFileAuthState, generateWAMessageFromContent, makeCacheableSignalKeyStore, delay, Browsers } from "@al-e-dev/baileys"
+import baileys, { DisconnectReason, makeInMemoryStore, useMultiFileAuthState, generateWAMessageFromContent, makeCacheableSignalKeyStore, delay, Browsers, fetchLatestBaileysVersion } from "@al-e-dev/baileys"
 import pino from "pino"
 import readline from "readline"
 import { exec } from "child_process"
@@ -13,10 +13,11 @@ const rl = readline.createInterface({ input: process.stdin, output: process.stdo
 const question = text => new Promise(resolve => rl.question(text, resolve))
 
 const start = async () => {
-    const store = makeInMemoryStore({ logger: pino().child({ level: "silent", stream: "store" }) });
+    const store = makeInMemoryStore({ logger: pino().child({ level: "silent", stream: "store" }) })
+    const { version } = fetchLatestBaileysVersion()
     const { state, saveCreds } = await useMultiFileAuthState("./auth/session");
     const sock = _prototype({
-        version: [2, 3000, 1017531287],
+        version,
         logger: pino({ level: "silent" }),
         auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "silent" })) },
         browser: Browsers.ubuntu("Chrome"),
