@@ -6,8 +6,7 @@ export default {
     description: 'Busca y descarga videos de YouTube',
     comand: ['youtube', 'yt'],
     exec: async (m, { sock }) => {
-        const youtube = new YouTube();
-        const video = await youtube.search(m.text);
+        const video = await YouTube.search(m.text);
 
         await sock.sendMessage(m.from, {
             caption: `*Título:* ${video.title}\n*Duración:* ${video.durationFormatted}\n*Canal:* ${video.channel.name}\n*Vistas:* ${video.views}\n*Subido:* ${video.uploadedAt}\n\n_Tiempo limite para responder 5 minutos_\n_Solo el remitente puede responder._`,
