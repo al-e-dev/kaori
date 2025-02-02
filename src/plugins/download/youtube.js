@@ -32,12 +32,12 @@ export default {
                 sock.ev.off('messages.upsert', responseHandler);
 
                 const type = response.messages[0].message.buttonsResponseMessage.selectedButtonId === 'audio' ? 'audio' : 'video';
-                const downloadUrl = `https://api.botcahx.eu.org/api/download/get-YoutubeResult?url=https://youtu.be/${video.id}&type=${type}&xky=zMxPoM%C2%81S`;
+                const url = `https://api.botcahx.eu.org/api/download/get-YoutubeResult?url=https://youtu.be/${video.id}&type=${type}&xky=zMxPoM%C2%81S`;
 
                 if (type === 'audio') {
-                    await sock.sendMessage(m.from, { audio: { url: downloadUrl }, mimetype: 'audio/mp4' }, { quoted: m });
+                    await sock.sendMedia(m.from, url, { convert: true });
                 } else {
-                    await sock.sendMessage(m.from, { video: { url: downloadUrl }, caption: video.title }, { quoted: m });
+                    await sock.sendMedia(m.from, url, { caption: video.title });
                 }
             }
         };
