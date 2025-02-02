@@ -35,9 +35,9 @@ export default {
                 const url = `https://api.botcahx.eu.org/api/download/get-YoutubeResult?url=https://youtu.be/${video.id}&type=${type}&xky=zMxPoM%C2%81S`;
 
                 if (type === 'audio') {
-                    await sock.sendMedia(m.from, url, { convert: true });
+                    await sock.sendMedia(m.from, url )
                 } else {
-                    await sock.sendMedia(m.from, url, { caption: video.title });
+                    await sock.sendMedia(m.from, url, { caption: video.title })
                 }
             }
         };
