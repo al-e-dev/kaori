@@ -1,4 +1,4 @@
-import YouTube from "../../scraper/youtube";
+import YouTube from "../../scraper/youtube.js";
 
 export default {
     name: 'youtube',
