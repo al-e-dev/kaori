@@ -6,19 +6,20 @@ export default {
     description: 'Busca y descarga videos de YouTube',
     comand: ['youtube', 'yt'],
     exec: async (m, { sock }) => {
-        const video = await YouTube.search(m.text);
+        const videos = await YouTube.search(m.text);
+        const video = videos[0];
 
-        await sock.sendMessage(m.from, {
-            caption: `*Título:* ${video.title}\n*Duración:* ${video.durationFormatted}\n*Canal:* ${video.channel.name}\n*Vistas:* ${video.views}\n*Subido:* ${video.uploadedAt}\n\n_Tiempo limite para responder 5 minutos_\n_Solo el remitente puede responder._`,
+        sock.sendMessage(m.from, {
+            caption: `*Título:* ${video.title}\n*Duración:* ${video.duration}\n*Canal:* ${video.author}\n*Vistas:* ${video.viewers}\n*Subido:* ${video.published}\n\n_Tiempo limite para responder 5 minutos_\n_Solo el remitente puede responder._`,
             footer: 'Bot',
-            image: { url: video.thumbnail.url },
+            image: { url: video.thumbnail },
             buttons: [
                 { buttonId: 'audio', buttonText: { displayText: 'Audio' }, type: 1 },
                 { buttonId: 'video', buttonText: { displayText: 'Video' }, type: 1 }
             ],
             headerType: 6,
             viewOnce: true
-        }, { quoted: m });
+        });
 
         const filter = response => response.key.remoteJid === m.from && response.key.participant === m.sender;
         const timeout = setTimeout(() => {
