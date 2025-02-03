@@ -1,6 +1,5 @@
 export default {
     name: 'stickerpack',
-    params: ['stickerpack', '%stickerpack'],
     description: 'paquete de sticker',
     comand: ['stickerpack'],
     exec: async (m, { sock }) => {

@@ -3,7 +3,6 @@ import { exec } from "child_process";
 
 export default {
     name: 'status',
-    params: [],
     desc: 'Obtiene el estado de los scripts activos con PM2',
     comand: ['status'],
     exec: async (m, { sock }) => {

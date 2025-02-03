@@ -2,7 +2,7 @@ export default {
     name: 'add',
     params: ['number'],
     description: 'Añadir miembro al grupo',
-    comand: ['add'],
+    comand: ['add', 'añadir'],
     exec: async (m, { sock }) => {
         const users = m.mentionedJid?.length ? m.mentionedJid : [m.args.join``.replace(/\D/g, '') + '@s.whatsapp.net'];
         if (!users.length) return await sock.sendMessage(m.from, { text: 'Proporciona un número válido.' }, { quoted: m });

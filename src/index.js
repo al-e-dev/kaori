@@ -48,7 +48,16 @@ const start = async () => {
             modify: () => `Configuración modificada`
         }[action];
 
-        participants.forEach(async p => {
+        for (const p of participants) {
+            const group = db.data.chats[id]
+            const fake = p.split('@')[0]
+            if (group.antifake && action === 'add') {
+                if (group.fake.some(i => fake.startsWith(i))) {
+                    await sock.sendMessage(id, { text: 'Tu numero se encuentra en la lista negra, seras eliminado automaticamente.' })
+                    await sock.groupParticipantsUpdate(id, [p], 'remove')
+                    continue
+                }
+            }
             const text = db.data.chats[id].messages[action]
                 .replace(/(@group|@action|@user|@time|@desc)/g, (m) => ({
                     '@group': `@${id}`,
@@ -56,7 +65,7 @@ const start = async () => {
                     '@user': `@${p.split`@`[0]}`,
                     '@time': new Date().toLocaleString(),
                     '@desc': desc
-                }[m]));
+                }[m]))
 
             const image = await sock.profilePictureUrl(p, 'image')
                 .catch(() => sock.profilePictureUrl(id, 'image'))
@@ -69,8 +78,8 @@ const start = async () => {
                     mentionedJid: [p, author],
                     groupMentions: [{ groupJid: id, groupSubject: subject }]
                 }
-            });
-        });
+            })
+        }
     });
 
     sock.ev.on("groups.update", async updates => {
@@ -121,7 +130,8 @@ const start = async () => {
                         if (plugin.isGroup && !m.isGroup) return m.reply("*Este comando solo está disponible para grupos.*")
 
                         if (plugin.os && platform === 'win32') return m.reply(`*Este comando no está disponible debido a la incompatibilidad del sistema operativo en el que se ejecuta ${_config.bot.name}.*`)
-                        // if (plugin.params && !plugin.params.every(param => m.text && m.text.split(' ')[plugin.params.indexOf(param)])) return m.reply(`*Por favor, proporcione los parámetros requeridos: ${plugin.params.map(p => `[${p}]`).join(' ') }.*`);
+                        if (plugin.params && plugin.params.length > 0 && !plugin.params.every(param => m.text && m.text.split(' ')[plugin.params.indexOf(param)])) return m.reply(`*Por favor, proporcione los parámetros requeridos: ${plugin.params.map(p => `[${p}]`).join(' ')}.*`)
+                        if (plugin.isQuoted && !m.quoted) return m.reply("*Por favor, responda a un mensaje para usar este comando.*")
                         if (plugin.isMedia && !plugin.isMedia?.includes(v.type.replace('Message', ''))) return m.reply(`*Por favor, adjunte un contenido multimedia de tipo ${plugin.isMedia.length === 1 ? plugin.isMedia[0] : plugin.isMedia.slice(0, -1).join(', ') + ' o ' + plugin.isMedia.slice(-1)} para procesar su solicitud.*`);
 
                         if (plugin.exec && typeof plugin.exec === 'function') {

@@ -2,7 +2,7 @@ import baileys from "@al-e-dev/baileys"
 
 export default {
     name: 'history',
-    params: ['query'],
+    params: ['message'],
     description: 'Envia una historia a los usuarios',
     comand: ['history'],
     isMedia: ['image', 'video', 'audio'],

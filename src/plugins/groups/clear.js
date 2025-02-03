@@ -1,6 +1,5 @@
 export default {
     name: 'clear',
-    params: [],
     description: 'Elimina la Cache',
     comand: ['clear'],
     exec: async (m, { sock, db }) => {

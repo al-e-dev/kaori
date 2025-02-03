@@ -1,8 +1,8 @@
 export default {
     name: 'group',
-    params: ['action'],
+    params: ['open', 'close', 'edit', 'noedit'],
     description: 'Gestionar configuraciones del grupo',
-    comand: ['group', 'gp'],
+    comand: ['group', 'gp', 'grupo'],
     exec: async (m, { sock }) => {
         if (!m.isBotAdmin) return sock.sendMessage(m.from, { text: 'El bot no es administrador.' }, { quoted: m });
         if (!m.isAdmin) return sock.sendMessage(m.from, { text: 'No eres administrador.' }, { quoted: m });
@@ -26,8 +26,6 @@ export default {
             if (metadata.restrict) return sock.sendMessage(m.from, { text: 'El grupo ya no permite edición.' }, { quoted: m });
             await sock.groupSettingUpdate(m.from, "locked");
             await sock.sendMessage(m.from, { text: 'Edición no permitida en el grupo.' }, { quoted: m });
-        } else {
-            await sock.sendMessage(m.from, { text: 'Uso: .group <cerrar/abrir/edit/noedit>' }, { quoted: m });
         }
     },
     isAdmin: true,

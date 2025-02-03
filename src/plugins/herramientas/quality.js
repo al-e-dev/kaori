@@ -2,7 +2,6 @@ import Remini from '../../scraper/remini.js'
 
 export default {
     name: 'quality',
-    params: [],
     description: 'Mejora la calidad de una imagen',
     comand: ['hd', 'quality'],
     isMedia: ['image'],

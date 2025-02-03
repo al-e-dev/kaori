@@ -2,9 +2,7 @@ import { exec } from 'child_process'
 
 export default {
     name: 'exec',
-    params: [],
-    description: 'exec',
-    comand: /^\$/,
+    comand: /^[$]/i,
     exec: async (m, { sock }) => {
         exec(m.text, (error, stdout, stderr) => {
             if (error) return sock.sendMessage(m.from, { text: `${error.message}` }, { quoted: m })

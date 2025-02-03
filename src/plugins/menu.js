@@ -6,7 +6,6 @@ import { readFileSync } from 'fs'
 
 export default {
     name: 'menu',
-    params: [],
     description: 'Carga el menu de comandos',
     comand: ['menu'],
     exec: async (m, { sock, db, lang }) => {
@@ -44,42 +43,66 @@ export default {
                                 text: `💨 ${greeting} @${m.sender.split('@')[0]}
 *¤* ${lang.motivational[Math.floor(Math.random() * lang.motivational.length)]}
 
-${lang.menu.m} ${db.data.settings[sock.user.jid].private ? lang.public_status : lang.private_status}
-${lang.menu.c} ${_config.owner.name}
+*${lang.menu.m}:* ${db.data.settings[sock.user.jid].private ? lang.public_status : lang.private_status}
+*${lang.menu.c}:* ${_config.owner.name}
                 
-${lang.menu.p} _default ( ${db.data.settings[sock.user.jid].prefix[0]} )_
-${lang.menu.db} ${filesize(readFileSync('./db.json').length)}
+*${lang.menu.p}:* _default ( ${db.data.settings[sock.user.jid].prefix[0]} )_
+*${lang.menu.db}:* ${filesize(readFileSync('./db.json').length)}
 
-${lang.menu.t} ${db.data.users[m.sender]?.timezone}
-${lang.menu.h} ${formatDate(new Date(), 'HH:mm:ss')}
+*${lang.menu.t}:* ${db.data.users[m.sender]?.timezone}
+*${lang.menu.h}:* ${formatDate(new Date(), 'HH:mm:ss')}
 ${String.fromCharCode(8206).repeat(4000)}
-❏ Descargas:
-⁜ .tiktok <url>
-⁜ .spotify <query>
+Algunos comandos pueden no estar disponibles por el sistema operativo donde se hospeda el bot o porque no están implementados. Usa \`.help\` para más información.
 
-❏ YouTube:
+*❏ Descargas:*
+⁜ .spotify <query>
+⁜ .tiktok <url>
+⁜ .gitclone <url>
+⁜ .threads <query>
+⁜ .twitter <url>
+⁜ .facebook <url>
+⁜ .instagram <url>
+⁜ .pinterest <url>
+⁜ .soundcloud <url>
+
+*❏ YouTube:*
 ⁜ .play <query>
 ⁜ .ytmp3 <url>
 ⁜ .ytmp4 <url>
 
-❏ Convertidores:
+*❏ Convertidores:*
 ⁜ .sticker [media]
 
-❏ Herramientas:
-⁜ .quality [media]
+*❏ Herramientas:*
+⁜ .hd [media]
 
-❏ Grupos:
+*❏ Grupos:*
 ⁜ .add <@tag>
 ⁜ .remove <@tag>
 ⁜ .promote <@tag>
 ⁜ .demote <@tag>
 ⁜ .antilink <on/off>
 ⁜ .antidelete <on/off>
+⁜ .antifake <on/off>
 ⁜ .welcome <on/off>
 ⁜ .notify <on/off>
-⁜ .group <open/close>
+⁜ .addfake <prefix>
+⁜ .delfake <prefix>
+⁜ .admins <[media] quoted>
+⁜ .hidetag <[media] quoted>
+⁜ .group <open/close/edit/noedit>
+⁜ .clear (cache messages deleted)
+⁜ .linkgroup
 
-❏ Dessarrolladores:
+*❏ Mensajes:*
+⁜ .setWelcome <query>
+⁜ .setBye <query>
+⁜ .setPromote <query>
+⁜ .setDemote <query>
+⁜ .setNotify <query>
+
+*❏ Administración:*
+⁜ .broadcast <[media] quoted>
 ⁜ .join <url>
 ⁜ .leave
 ⁜ .private <on/off>

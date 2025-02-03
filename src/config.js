@@ -11,7 +11,7 @@ global._config = {
         img: "https://files.catbox.moe/3m9yzl.jpg"
     },
     bot: {
-        name: "Nazi Bot",
+        name: "𝐍𝐀𝐙𝐈 • 𝐁𝐎𝐓",
         version: "1.0",
         hd: "https://files.catbox.moe/kkdvjl.jpg",
         img: "https://files.catbox.moe/ahdtgk.jpg"

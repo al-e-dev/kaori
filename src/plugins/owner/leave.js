@@ -1,6 +1,5 @@
 export default {
     name: 'leave',
-    params: [],
     description: 'Salir del grupo',
     comand: ['leave', 'salir'],
     exec: async (m, { sock, delay }) => {

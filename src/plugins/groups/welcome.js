@@ -1,17 +1,21 @@
 export default {
     name: 'welcome',
-    params: ['activar', 'desactivar', 'on', 'off'],
+    params: ['on', 'off'],
     description: 'Activa o desactiva la bienvenida en el grupo',
     comand: ['welcome'],
     exec: async (m, { sock, db }) => {
-        const [action] = m.args;
-        if (!['activar', 'desactivar', 'on', 'off'].includes(action)) {
-            return sock.sendMessage(m.from, { text: 'Uso: .welcome <activar|desactivar|on|off>' }, { quoted: m });
+        if (m.args[0] === 'on') {
+            if (db.data.chats[m.from].welcome) return m.reply('➤ Comando: welcome ⧉ Estado: ya está habilitado.')
+            db.data.chats[m.from].welcome = true
+            await m.reply('➤ Comando: welcome ⧉ Estado: habilitado.' )
+        } else if (m.args[0] === 'off') {
+            if (!db.data.chats[m.from].welcome) return m.reply('➤ Comando: welcome ⧉ Estado: ya está deshabilitado.')
+            db.data.chats[m.from].welcome = false
+            await m.reply('➤ Comando: welcome ⧉ Estado: deshabilitado.')
+        } else {
+            const status = db.data.chats[m.from].welcome ? 'habilitado' : 'deshabilitado'
+            await m.reply(`➤ Comando: welcome ⧉ Estado: ${status}`)
         }
-
-        const chat = db.data.chats[m.from];
-        chat.welcome = action === 'activar' || action === 'on' ? true : false;
-        await sock.sendMessage(m.from, { text: `Bienvenida ${chat.welcome ? 'activada' : 'desactivada'}` }, { quoted: m });
     },
     isGroup: true
 }

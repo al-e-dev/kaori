@@ -4,20 +4,17 @@ export default {
     description: 'Habilitar o deshabilitar antidelete',
     comand: ['antidelete'],
     exec: async (m, { sock, db }) => {
-        if (!m.isOwner) return sock.sendMessage(m.from, { text: 'Este comando solo puede ser usado por el propietario.' });
-        const chat = db.data.chats[m.from];
-        if (!chat) return sock.sendMessage(m.from, { text: 'Chat no encontrado.' });
-        const action = m.args[0]?.toLowerCase();
-        if (action === 'on') {
-            if (chat.antidelete) return sock.sendMessage(m.from, { text: 'Antidelete ya está habilitado.' });
-            chat.antidelete = true;
-            await sock.sendMessage(m.from, { text: 'Antidelete habilitado.' });
-        } else if (action === 'off') {
-            if (!chat.antidelete) return sock.sendMessage(m.from, { text: 'Antidelete ya está deshabilitado.' });
-            chat.antidelete = false;
-            await sock.sendMessage(m.from, { text: 'Antidelete deshabilitado.' });
+        if (m.args[0] === 'on') {
+            if (db.data.chats[m.from].antidelete) return m.reply('➤ Comando: antidelete ⧉ Estado: ya está habilitado.')
+            db.data.chats[m.from].antidelete = true
+            await m.reply('➤ Comando: antidelete ⧉ Estado: habilitado.' )
+        } else if (m.args[0] === 'off') {
+            if (!db.data.chats[m.from].antidelete) return m.reply('➤ Comando: antidelete ⧉ Estado: ya está deshabilitado.')
+            db.data.chats[m.from].antidelete = false
+            await m.reply('➤ Comando: antidelete ⧉ Estado: deshabilitado.')
         } else {
-            await sock.sendMessage(m.from, { text: 'Opción inválida.' });
+            const status = db.data.chats[m.from].antidelete ? 'habilitado' : 'deshabilitado'
+            await m.reply(`➤ Comando: antidelete ⧉ Estado: ${status}`)
         }
     },
     isAdmin: true,

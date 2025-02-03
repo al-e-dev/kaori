@@ -2,7 +2,7 @@ export default {
     name: 'remove',
     params: ['number'],
     description: 'Eliminar miembro del grupo',
-    comand: ['remove'],
+    comand: ['remove', 'kick', 'ban'],
     exec: async (m, { sock }) => {
         const users = m.mentionedJid.length ? m.mentionedJid : [m.args.join(" ").replace(/[^0-9]/g, '') + '@s.whatsapp.net']
         

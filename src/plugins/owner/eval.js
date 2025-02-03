@@ -9,8 +9,6 @@ const { proto } = baileys
 
 export default {
     name: 'eval',
-    params: [],
-    description: 'eval',
     comand:  /^[_]/i,
     exec: async (m, { sock }) => {
         let evan

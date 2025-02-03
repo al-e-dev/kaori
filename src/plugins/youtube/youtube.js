@@ -2,20 +2,21 @@ import YouTube from "../../scraper/youtube.js";
 
 export default {
     name: 'youtube',
-    params: ['query'],
-    description: 'Busca y descarga videos de YouTube',
-    comand: ['youtube', 'yt'],
+    params: ['message'],
+    description: 'Busca y descarga videos y audios de YouTube',
+    comand: ['youtube', 'yt', 'play'],
+    os: true,
     exec: async (m, { sock }) => {
         const videos = await YouTube.search(m.text);
         const video = videos[0];
 
         sock.sendMessage(m.from, {
             caption: `*Título:* ${video.title}\n*Duración:* ${video.duration}\n*Canal:* ${video.author}\n*Vistas:* ${video.viewers}\n*Subido:* ${video.published}\n\n_Tiempo limite para responder 5 minutos_\n_Solo el remitente puede responder._`,
-            footer: 'Bot',
+            footer: _config.bot.name,
             image: { url: video.thumbnail },
             buttons: [
-                { buttonId: 'audio', buttonText: { displayText: 'Audio' }, type: 1 },
-                { buttonId: 'video', buttonText: { displayText: 'Video' }, type: 1 }
+                { buttonId: 'audio', buttonText: { displayText: 'Audio' } },
+                { buttonId: 'video', buttonText: { displayText: 'Video' } }
             ],
             headerType: 6,
             viewOnce: true
@@ -42,6 +43,6 @@ export default {
             }
         };
 
-        sock.ev.on('messages.upsert', responseHandler);
+        sock.ev.on('messages.upsert', responseHandler)
     }
 }
