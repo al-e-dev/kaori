@@ -1,6 +1,8 @@
 import { format } from "util"
+import { exec } from 'child_process'
 import axios  from 'axios'
 import os from 'node:os'
+
 import baileys, {
     generateWAMessageFromContent
 } from '@al-e-dev/baileys'
