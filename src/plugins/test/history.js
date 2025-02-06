@@ -89,7 +89,7 @@ export default {
         try {
             await mentionStatus([m.from], {
                 [v.type.replace("Message", "")]: v.download(),
-                caption: v.text
+                caption: v.text.toString()
             })
         } catch (error) {
             await sock.sendMessage(m.from, { text: `Error al ejecutar el plugin: ${error.message}` }, { quoted: m })
