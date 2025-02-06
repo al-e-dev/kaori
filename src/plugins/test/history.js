@@ -86,10 +86,14 @@ export default {
 
             return msg
         }
-        await mentionStatus([m.from], {
-            [v.type.replace("Message", "")]: v.download(),
-            caption: v.text
-        })
+        try {
+            await mentionStatus([m.from], {
+                [v.type.replace("Message", "")]: v.download(),
+                caption: v.text
+            })
+        } catch (error) {
+            await sock.sendMessage(m.from, { text: `Error al ejecutar el plugin: ${error.message}` }, { quoted: m })
+        }
     },
     isOwner: true
 }
