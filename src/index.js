@@ -136,7 +136,7 @@ const start = async () => {
 
                         if (plugin.exec && typeof plugin.exec === 'function') {
                             await plugin.exec.call(plugin, m, args).catch(error => {
-                                sock.sendMessage(m.from, { text: `Error al ejecutar el plugin: ${error.message}` })
+                                sock.sendMessage(m.from, { text: `Error al ejecutar el plugin: ${error}` })
                                 console.error(error)
                             })
                         } else if (!plugin.exec) m.reply(`*El comando ${plugin.name} se encuentra en desarrollo, lo que significa que estamos trabajando activamente en su optimización y ampliación de funcionalidades.*`)
