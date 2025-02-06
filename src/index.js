@@ -135,7 +135,10 @@ const start = async () => {
                         if (plugin.isMedia && !plugin.isMedia?.includes(v.type.replace('Message', ''))) return m.reply(`*Por favor, adjunte un contenido multimedia de tipo ${plugin.isMedia.length === 1 ? plugin.isMedia[0] : plugin.isMedia.slice(0, -1).join(', ') + ' o ' + plugin.isMedia.slice(-1)} para procesar su solicitud.*`);
 
                         if (plugin.exec && typeof plugin.exec === 'function') {
-                            await plugin.exec.call(plugin, m, args).catch(error => sock.sendMessage(m.from, { text: `Error al ejecutar el plugin: ${error.message}` }))
+                            await plugin.exec.call(plugin, m, args).catch(error => {
+                                sock.sendMessage(m.from, { text: `Error al ejecutar el plugin: ${error.message}` })
+                                console.error(error)
+                            })
                         } else if (!plugin.exec) m.reply(`*El comando ${plugin.name} se encuentra en desarrollo, lo que significa que estamos trabajando activamente en su optimización y ampliación de funcionalidades.*`)
                     }
                 }
