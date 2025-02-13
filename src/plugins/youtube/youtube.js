@@ -43,6 +43,7 @@ export default {
                     await sock.sendMessage(m.from, {
                         audio: audioBuffer,
                         mimetype: 'audio/mp4',
+                        ptt: false,
                         contextInfo: {
                             externalAdReply: {
                                 containsAutoReply: true,
