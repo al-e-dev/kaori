@@ -42,8 +42,8 @@ export default {
                     const audioBuffer = await ytmp3(video.url)
                     await sock.sendMessage(m.from, {
                         audio: audioBuffer,
-                        mimetype: 'audio/mpeg',
-                        ptt: false,
+                        mimetype: 'audio/mp4',
+                        ptt: true,
                         contextInfo: {
                             externalAdReply: {
                                 containsAutoReply: true,
@@ -55,7 +55,8 @@ export default {
                                 thumbnailUrl: video.thumbnail,
                                 title: video.title,
                                 body: _config.bot.name,
-                            }                        }
+                            }
+                        }
                     }, {})
                 } else if (type === 'video') {
                     await sock.sendMedia(m.from, await ytmp4(video.url), { caption: video.title });
