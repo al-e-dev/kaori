@@ -55,14 +55,7 @@ export default {
                                 thumbnailUrl: video.thumbnail,
                                 title: video.title,
                                 body: _config.bot.name,
-                            },
-                            forwardingScore: 999,
-                            isForwarded: true,
-                            mentionedJid: [m.sender],
-                            businessMessageForwardInfo: {
-                                businessOwnerJid: sock.user.jid
-                            }
-                        }
+                            }                        }
                     }, {})
                 } else if (type === 'video') {
                     await sock.sendMedia(m.from, await ytmp4(video.url), { caption: video.title });
