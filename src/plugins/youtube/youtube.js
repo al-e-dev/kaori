@@ -46,7 +46,6 @@ export default {
                         ptt: false,
                         contextInfo: {
                             externalAdReply: {
-                                containsAutoReply: true,
                                 mediaType: 1,
                                 mediaUrl: '',
                                 renderLargerThumbnail: false,
@@ -57,7 +56,7 @@ export default {
                                 body: _config.bot.name,
                             }
                         }
-                    }, {})
+                    })
                 } else if (type === 'video') {
                     await sock.sendMedia(m.from, await ytmp4(video.url), { caption: video.title });
                 }
