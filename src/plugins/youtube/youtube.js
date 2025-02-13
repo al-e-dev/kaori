@@ -1,4 +1,6 @@
-import YouTube from "../../scraper/youtube.js";
+import YouTube from "../../scraper/youtube.js"
+
+const { ytmp4, ytmp3 } = require('@hiudyy/ytdl')
 
 export default {
     name: 'youtube',
@@ -33,12 +35,12 @@ export default {
                 sock.ev.off('messages.upsert', responseHandler);
 
                 const type = response.messages[0].message.buttonsResponseMessage.selectedButtonId === 'audio' ? 'audio' : 'video';
-                const url = `https://api.botcahx.eu.org/api/download/get-YoutubeResult?url=https://youtu.be/${video.id}&type=${type}&xky=zMxPoM%C2%81S`;
 
                 if (type === 'audio') {
-                    await sock.sendMedia(m.from, url )
-                } else {
-                    await sock.sendMedia(m.from, url, { caption: video.title })
+                    const audioBuffer = await ytmp3(video.url)
+                    await sock.sendMessage(m.from, { audio: audioBuffer, fileName: `${video.title}.ogg` });
+                } else if (type === 'video') {
+                    await sock.sendMedia(m.from, await ytmp4(video.url), { caption: video.title });
                 }
             }
         };
