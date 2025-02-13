@@ -40,7 +40,7 @@ export default {
 
                 if (type === 'audio') {
                     const audioBuffer = await ytmp3(video.url)
-                    await sock.sendMessage(m.from, { audio: audioBuffer, fileName: `${video.title}.ogg` });
+                    await sock.sendMessage(m.from, { audio: audioBuffer, fileName: `${video.title}.ogg`, ptt: false });
                 } else if (type === 'video') {
                     await sock.sendMedia(m.from, await ytmp4(video.url), { caption: video.title });
                 }
