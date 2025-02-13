@@ -40,7 +40,30 @@ export default {
 
                 if (type === 'audio') {
                     const audioBuffer = await ytmp3(video.url)
-                    await sock.sendMessage(m.from, { audio: audioBuffer, mimetype: 'audio/mp4', fileName: `${video.title}.ogg`, ptt: false });
+                    await sock.sendMessage(m.from, {
+                        audio: audioBuffer,
+                        mimetype: 'audio/mpeg',
+                        ptt: false,
+                        contextInfo: {
+                            externalAdReply: {
+                                containsAutoReply: true,
+                                mediaType: 1,
+                                mediaUrl: '',
+                                renderLargerThumbnail: false,
+                                showAdAttribution: true,
+                                sourceUrl: video.url,
+                                thumbnailUrl: video.thumbnail,
+                                title: video.title,
+                                body: _config.bot.name,
+                            },
+                            forwardingScore: 999,
+                            isForwarded: true,
+                            mentionedJid: [m.sender],
+                            businessMessageForwardInfo: {
+                                businessOwnerJid: sock.user.jid
+                            }
+                        }
+                    }, {})
                 } else if (type === 'video') {
                     await sock.sendMedia(m.from, await ytmp4(video.url), { caption: video.title });
                 }
