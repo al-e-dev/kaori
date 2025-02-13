@@ -49,7 +49,6 @@ export default {
                                 mediaType: 1,
                                 mediaUrl: '',
                                 renderLargerThumbnail: false,
-                                showAdAttribution: true,
                                 sourceUrl: video.url,
                                 thumbnailUrl: video.thumbnail,
                                 title: video.title,
