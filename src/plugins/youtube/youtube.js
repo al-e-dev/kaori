@@ -47,7 +47,6 @@ export default {
                         contextInfo: {
                             externalAdReply: {
                                 mediaType: 1,
-                                mediaUrl: '',
                                 renderLargerThumbnail: false,
                                 sourceUrl: video.url,
                                 thumbnailUrl: video.thumbnail,
