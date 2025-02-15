@@ -41,9 +41,9 @@ export default {
                 if (type === 'audio') {
                     const audioBuffer = await ytmp3(video.url)
                     await sock.sendMessage(m.from, {
-                        audio: audioBuffer.buffer(),
+                        audio: audioBuffer,
                         mimetype: 'audio/mpeg',
-                        ptt: true,
+                        ptt: false,
                         contextInfo: {
                             externalAdReply: {
                                 mediaType: 1,
