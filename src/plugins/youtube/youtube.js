@@ -50,8 +50,7 @@ export default {
                                 renderLargerThumbnail: false,
                                 sourceUrl: video.url,
                                 thumbnailUrl: video.thumbnail,
-                                title: video.title,
-                                body: _config.bot.name,
+                                body: video.title
                             }
                         }
                     })
