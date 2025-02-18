@@ -11,6 +11,7 @@ export default {
             .map(x => x.id);
 
         let count = 0;
+        await m.reply("Iniciando envio de mensaje a " + groups.length + " grupos.")
         for (let id of groups) {
             if (m.args.join(' ')) {
                 await sock.sendMessage(id, {
