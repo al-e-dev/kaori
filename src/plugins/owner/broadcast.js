@@ -25,7 +25,7 @@ export default {
                 });
             }
             count++;
-            delay(10000)
+            await delay(10000)
         }
         sock.sendMessage(m.from, { text: `Enviado a ${count} grupos` });
     },
