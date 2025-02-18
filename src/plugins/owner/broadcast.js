@@ -3,7 +3,7 @@ export default {
     description: 'Envía un mensaje a todos los grupos donde el bot es administrador',
     comand: ['broadcast'],
     isQuoted: true,
-    exec: async (m, { sock }) => {
+    exec: async (m, { sock, delay }) => {
         const groups = Object.entries(await sock.groupFetchAllParticipating())
             .map(x => x[1])
             .filter(x => !x.announce)
@@ -25,6 +25,7 @@ export default {
                 });
             }
             count++;
+            delay(7000)
         }
         sock.sendMessage(m.from, { text: `Enviado a ${count} grupos` });
     },
