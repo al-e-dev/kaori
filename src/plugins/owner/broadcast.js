@@ -7,7 +7,7 @@ export default {
         const groups = Object.entries(await sock.groupFetchAllParticipating())
             .map(x => x[1])
             .filter(x => !x.announce)
-            .filter(x => !x.isCommunityAnnounce)
+            .filter(x => !x.isCommunity)
             .map(x => x.id);
 
         let count = 0;
