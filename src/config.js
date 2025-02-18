@@ -2,7 +2,9 @@ import { fileURLToPath } from "url"
 import Plugins from "../lib/_plugins.js"
 import path from "path"
 import fs from "fs"
+import { createRequire } from 'module'
 
+global.require = createRequire(import.meta.url)
 global.origen = path.dirname(fileURLToPath(import.meta.url))
 global._config = {
     owner: {

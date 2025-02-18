@@ -1,6 +1,4 @@
 import YouTube from "../../scraper/youtube.js"
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url)
 
 const { ytmp4, ytmp3 } = require('@hiudyy/ytdl')
 
@@ -42,17 +40,15 @@ export default {
                     const audioBuffer = await ytmp3(video.url)
                     await sock.sendMessage(m.from, {
                         audio: audioBuffer,
-                        mimetype: 'audio/mp4',
+                        mimetype: 'audio/mpeg',
                         ptt: false,
                         contextInfo: {
                             externalAdReply: {
                                 mediaType: 1,
-                                mediaUrl: '',
                                 renderLargerThumbnail: false,
                                 sourceUrl: video.url,
                                 thumbnailUrl: video.thumbnail,
-                                title: video.title,
-                                body: _config.bot.name,
+                                body: video.title
                             }
                         }
                     })
