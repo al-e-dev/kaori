@@ -24,6 +24,7 @@ export default {
                     url: url[0].url
                 }
             })), {
+                delay: 3000,
                 caption: `*· Me gusta* – ${result[0].meta.like_count}
 *· Comentarios* – ${result[0].meta.comment_count}
 *· Creador* – ${result[0].meta.username}`
