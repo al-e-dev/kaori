@@ -27,7 +27,7 @@ export default {
                     } else {
                         await sock.sendMessage(m.from, {
                             caption: data.title,
-                            video: { url: data.media.images[0] }
+                            image: { url: data.media.images[0] }
                         }, { quoted: m })
                     }
                 }
