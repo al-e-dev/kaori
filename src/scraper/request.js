@@ -15,7 +15,7 @@ export default new class Request {
                 'Accept-Language': 'en-US,en;q=0.9',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             },
-            jar,
+            jar: this.jar,
             timeout: 10000,
             maxRedirects: 5,
         }))
@@ -25,7 +25,7 @@ export default new class Request {
                 'referer': 'https://www.google.com/',
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             },
-            cookieJar,
+            cookieJar: this.jar,
             followRedirect: true,
             timeout: 10000,
             retry: {
