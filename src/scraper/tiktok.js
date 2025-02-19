@@ -30,7 +30,6 @@ export default new class Tiktok {
                     hd: 1
                 }
             }).then(async ({ data: { data } }) => {
-                console.log(JSON.stringify(data, null, 2))
                 resolve({
                     status: true,
                     data: {
