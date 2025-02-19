@@ -27,7 +27,7 @@ export default new class Request {
             },
             cookieJar: this.jar,
             followRedirect: true,
-            timeout: 10000,
+            timeout: { request: 10000 },
             retry: {
                 limit: 3,
                 methods: ['GET', 'POST'],
