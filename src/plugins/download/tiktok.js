@@ -24,6 +24,11 @@ export default {
                             delay: 3000,
                             caption: data.title
                         })
+                    } else {
+                        await sock.sendMessage(m.from, {
+                            caption: data.title,
+                            video: { url: data.media.images[0] }
+                        }, { quoted: m })
                     }
                 }
             })
