@@ -1,4 +1,6 @@
 import YouTube from "../../scraper/youtube.js"
+const log = console.log
+console.log = () => {}
 
 const { ytmp4, ytmp3 } = require('@hiudyy/ytdl')
 
@@ -61,3 +63,5 @@ export default {
         sock.ev.on('messages.upsert', responseHandler)
     }
 }
+
+console.log = log
