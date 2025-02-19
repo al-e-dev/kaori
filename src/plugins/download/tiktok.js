@@ -8,6 +8,7 @@ export default {
     exec: async (m, { sock }) => {
         Tiktok.download(m.text)
             .then(async ({ data }) => {
+                console.log(JSON.stringify(data, null, 2))
                 if (data.media.type === 'video') {
                     await sock.sendMessage(m.from, {
                         caption: data.title,
