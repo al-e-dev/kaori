@@ -24,19 +24,6 @@ export default {
                         headerType: 6,
                         viewOnce: true
                     }, { quoted: m })
-
-                    sock.ev.on('messages.upsert', async ({ messages }) => {
-                        for (let msg of messages) {
-                            if (msg.message?.buttonsResponseMessage?.selectedButtonId === 'audio') {
-                                await sock.sendMessage(m.from, {
-                                    audio: { url: data.music.play },
-                                    mimetype: 'audio/mp4'
-                                }, { quoted: m })
-                                continue
-                            }
-                        }
-                    })
-
                 } else if (data.media.type === 'image') {
                     for (let i of data.media.image) {
                         await sock.sendMessage(m.from, {
