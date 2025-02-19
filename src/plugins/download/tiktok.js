@@ -8,34 +8,23 @@ export default {
     exec: async (m, { sock }) => {
         Tiktok.download(m.text)
             .then(async ({ data }) => {
-                console.log(JSON.stringify(data, null, 2))
                 if (data.media.type === 'video') {
                     await sock.sendMessage(m.from, {
                         caption: data.title,
-                        footer: _config.owner.name,
-                        video: { url: data.media.nowatermark.play },
-                        buttons: [
-                            {
-                                buttonId: "audio",
-                                buttonText: {
-                                    displayText: 'Audio'
-                                }
-                            }
-                        ],
-                        headerType: 6,
-                        viewOnce: true
+                        video: { url: data.media.nowatermark.play }
                     }, { quoted: m })
                 } else if (data.media.type === 'image') {
-                    for (let i of data.media.image) {
-                        await sock.sendMessage(m.from, {
-                            image: { url: i },
+                    if (data.media.images.length > 1){
+                        await sock.sendAlbumMessage(m.from, data.media.images.map((url) => ({
+                            type: data.media.type,
+                            data: {
+                                url: url
+                            }
+                        })), {
+                            delay: 3000,
                             caption: data.title
-                        }, { quoted: m })
+                        })
                     }
-                    await sock.sendMessage(m.from, {
-                        audio: { url: data.music.play },
-                        mimetype: 'audio/mp4'
-                    }, { quoted: m })
                 }
             })
             .catch(error => console.error('Error capturado:', error))
