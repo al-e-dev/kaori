@@ -1,4 +1,4 @@
-import Instagram from "../../scraper/instagram"
+import Instagram from "../../scraper/instagram.js"
 
 export default {
     name: 'instagram',
