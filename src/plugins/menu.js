@@ -43,7 +43,7 @@ export default {
                                 text: `💨 ${greeting} @${m.sender.split('@')[0]}
 *¤* ${lang.motivational[Math.floor(Math.random() * lang.motivational.length)]}
 
-*${lang.menu.m}:* ${db.data.settings[sock.user.jid].private ? lang.public_status : lang.private_status}
+*${lang.menu.m}:* ${db.data.settings[sock.user.jid].private ? lang.private_status : lang.public_status }
 *${lang.menu.c}:* ${_config.owner.name}
                 
 *${lang.menu.p}:* _default ( ${db.data.settings[sock.user.jid].prefix[0]} )_
