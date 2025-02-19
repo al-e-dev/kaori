@@ -18,10 +18,10 @@ export default {
 *· Creador* – ${result.meta.username}`
             })
         } else if (dec(result) === 'array' && media(result[0].url[0].type)) {
-            await sock.sendAlbumMessage(m.from, result.map(({ url, type }) => ({
-                type,
+            await sock.sendAlbumMessage(m.from, result.map(({ url }) => ({
+                type: media(url[0].type),
                 data: {
-                    url: url[0]
+                    url: url[0].url
                 }
             })), {
                 caption: `*· Me gusta* – ${result[0].meta.like_count}
