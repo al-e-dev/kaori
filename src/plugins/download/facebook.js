@@ -6,7 +6,7 @@ export default {
     description: 'Busca y descarga audio de Facebook',
     comand: ['facebook', 'fb'],
     exec: async (m, { sock }) => {
-        const fb = Facebook.download(m.text)
+        const fb = await Facebook.download(m.text)
 
         console.log(fb)
         if (fb) {
