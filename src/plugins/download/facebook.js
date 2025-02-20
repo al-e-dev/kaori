@@ -10,7 +10,7 @@ export default {
 
         console.log(fb)
         if (fb) {
-            await sock.sendMessage(m.from, { [fb.type]: { url: fb.download, caption: fb.author } })
+            await sock.sendMessage(m.from, { [fb.type]: { url: fb.download }, caption: fb.author })
         } else {
             await sock.sendAlbumMessage(m.from, fb.images.map(img => ({ type: "image", data: { url: img } })), { caption: fb.author })
         }
