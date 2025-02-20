@@ -1,16 +1,17 @@
 import Req from "./request.js"
 import fs from "fs"
 
-export default  class Facebook {
+export default class Facebook {
     constructor() {
         this.parse = (str) => JSON.parse(`{"text": "${str}"}`).text
     }
-    async download(url) {
+
+    download(url) {
         return new Promise((resolve, reject) => {
             if (!url?.trim() || !["facebook.com", "fb.watch"].some(domain => url.includes(domain))) {
                 return reject("Please enter a valid Facebook URL")
             }
-            
+
             Req.axios.get(url, {
                 headers: {
                     "sec-fetch-user": "?1",
@@ -24,63 +25,43 @@ export default  class Facebook {
                     "accept-language": "en-GB,en;q=0.9,tr-TR;q=0.8,tr;q=0.7,en-US;q=0.6",
                     "sec-ch-ua": '"Google Chrome";v="89", "Chromium";v="89", ";Not A Brand";v="99"',
                     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
-                    accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-                    cookie: "sb=Rn8BYQvCEb2fpMQZjsd6L382; datr=Rn8BYbyhXgw9RlOvmsosmVNT; c_user=100003164630629; _fbp=fb.1.1629876126997.444699739; wd=1920x939; spin=r.1004812505_b.trunk_t.1638730393_s.1_v.2_; xs=28%3A8ROnP0aeVF8XcQ%3A2%3A1627488145%3A-1%3A4916%3A%3AAcWIuSjPy2mlTPuZAeA2wWzHzEDuumXI89jH8a_QIV8; fr=0jQw7hcrFdas2ZeyT.AWVpRNl_4noCEs_hb8kaZahs-jA.BhrQqa.3E.AAA.0.0.BhrQqa.AWUu879ZtCw",
+                    accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
                 }
             }).then(({ data }) => {
-                const clean = data.replace(/&quot;/g, '"').replace(/&amp;/g, "&")
+                const cleaned = data.replace(/&quot;/g, '"').replace(/&amp;/g, "&")
                 
-                let result = {}
-                let match = clean.match(/"all_subattachments":\{"count":(\d+),"nodes":\[(.*?)\]\}/)
+                let result = { 
+                    url,
+                    author: this.parse(cleaned.match(/"actors":\[.*?"name":"(.*?)"/)?.[1] || cleaned.match(/"owning_profile":\{"__typename":"User","name":"(.*?)"/)?.[1] || "Unknown"),
+                    title: this.parse(cleaned.match(/"story":\{"message":\{"text":"((?:\\.|[^"\\])*)"/)?.[1] || cleaned.match(/"message_preferred_body":\{"__typename":"TextWithEntities".*?"text":"(.*?)"/)?.[1] || cleaned.match(/"message":\{"text":"(.*?)"/)?.[1] || "Facebook Post"),
+                    creation: new Date(parseInt(cleaned.match(/"creation_time":(\d+)/)?.[1] || "0") * 1000).toLocaleString()
+                }
                 
+                const extract = (regex) => this.parse(cleaned.match(regex)?.[1] || "")
+                
+                let match = cleaned.match(/"all_subattachments":\{"count":(\d+),"nodes":\[(.*?)\]\}/)
                 if (match) {
                     const images = (match[2].match(/"image":\{"uri":"(.*?)"/g) || []).map(img => this.parse(img.match(/"image":\{"uri":"(.*?)"/)[1]))
-                    
-                    result = {
-                        url,
-                        type: "image",
-                        images,
-                        creation: new Date(parseInt(data.match(/"creation_time":(\d+)/)?.[1]) * 1000).toLocaleString(),
-                        author: this.parse(clean.match(/"actors":\[.*?"name":"(.*?)"/)?.[1] || clean.match(/"owning_profile":\{"__typename":"User","name":"(.*?)","id":"(.*?)"\}/)?.[1] || "Unknown").replace(/\\"/g, '"'),
-                        title: this.parse(clean.match(/"story":\{"message":\{"text":"((?:\\.|[^"\\])*)"/)?.[1] || clean.match(/"message_preferred_body":\{"__typename":"TextWithEntities".*?"text":"(.*?)"/)?.[1] || clean.match(/"message":\{"text":"(.*?)"/)?.[1] || "Facebook Post").replace(/\\"/g, '"')
-                    }
-                } else {
-                    match = clean.match(/"comet_photo_attachment_resolution_renderer":\{[^}]*"image":\{"uri":"(.*?)"/) || clean.match(/"owner":\{[^}]*\},"created_time":[0-9]+,"image":\{"uri":"(.*?)"/)
-                    if (match) {
-                        result = {
-                            url,
-                            type: "image",
-                            download: this.parse(match[1]),
-                            creation: new Date(parseInt(data.match(/"creation_time":(\d+)/)?.[1]) * 1000).toLocaleString(),
-                            author: this.parse(clean.match(/"actors":\[.*?"name":"(.*?)"/)?.[1] || clean.match(/"owning_profile":\{"__typename":"User","name":"(.*?)","id":"(.*?)"\}/)?.[1] || "Unknown").replace(/\\"/g, '"'),
-                            title: this.parse(clean.match(/"story":\{"message":\{"text":"(.*?)"/)?.[1] || clean.match(/"message_preferred_body":\{"__typename":"TextWithEntities".*?"text":"(.*?)"/)?.[1] || clean.match(/"message":\{"text":"(.*?)"/)?.[1] || "Facebook Post").replace(/\\"/g, '"')
-                        }
-                    }
+                    return resolve({ ...result, type: "image", images })
                 }
                 
-                fs.writeFileSync("resultado.txt", clean, "utf8")
-                
-                match = clean.match(/"browser_native_sd_url":"(.*?)"/) || clean.match(/"playable_url":"(.*?)"/) || clean.match(/sd_src\s*:\s*"([^"]*)"/) || clean.match(/(?<="src":")[^"]*(https:\/\/[^\"]*)/)
-                        
-                if (match) {
-                    result = {
-                        url,
-                        type: "video",
-                        duration: Number(clean.match(/"playable_duration_in_ms":(\d+)/)?.[1] || 0),
-                        download: clean ? this.parse(clean.match(/"browser_native_hd_url":"(.*?)"/)?.[1] || "") : this.parse(match[1]),
-                        thumbnail: this.parse(clean.match(/"preferred_thumbnail":\{"image":\{"uri":"(.*?)"/)?.[1] || ""),
-                        ...result
-                    }
+                const image = extract(/"comet_photo_attachment_resolution_renderer":\{[^}]*"image":\{"uri":"(.*?)"/)
+                if (image) {
+                    return resolve({ ...result, type: "image", download: image })
                 }
                 
-                return Object.keys(result).length ? resolve({ status: true, ...result }) : reject("Unable to fetch video information at this time. Please try again")
+                const video = extract(/"browser_native_sd_url":"(.*?)"/) || extract(/"playable_url":"(.*?)"/) || extract(/sd_src\s*:\s*"([^"]*)"/) || extract(/(?<="src":")[^"]*(https:\/\/[^\"]*)/)
+                if (video) {
+                    return resolve({ ...result, type: "video", download: video, duration: Number(extract(/"playable_duration_in_ms":(\d+)/)), thumbnail: extract(/"preferred_thumbnail":\{"image":\{"uri":"(.*?)"/) })
+                }
+
+                reject("Unable to fetch video information at this time. Please try again")
             }).catch(err => {
-                reject(`Unable to fetch video information. Axios Error: ${err}`)
-                console.log(err)
+                reject(`Unable to fetch video information. Error: ${err.message}`)
             })
         })
     }
-}
+}   
 
 const fb = new Facebook()
-fb.download("https://www.facebook.com/share/164wXDwvFj/").then(console.log).catch(console.error)
+fb.download("https://www.facebook.com/share/164wXDwvFj/ ").then(console.log).catch(console.error)
