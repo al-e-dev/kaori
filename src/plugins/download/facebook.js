@@ -1,4 +1,4 @@
-import Facebook from "../../scraper/facebook"
+import Facebook from "../../scraper/facebook.js"
 
 export default {
     name: 'facebook',
