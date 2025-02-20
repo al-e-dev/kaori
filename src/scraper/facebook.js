@@ -1,7 +1,7 @@
 import Req from "./request.js"
 import fs from "fs"
 
-export default new class Facebook {
+export default class Facebook {
     constructor() {
         this.parse = (str) => JSON.parse(`{"text": "${str}"}`).text
     }
@@ -46,7 +46,7 @@ export default new class Facebook {
                         title: this.parse(clean.match(/"story":\{"message":\{"text":"(.*?)"/)?.[1] || "Unknown")
                     }
                 } else {
-                    match = clean.match(/"image":\{"uri":"(.*?)"/)
+                    match = clean.match(/"comet_photo_attachment_resolution_renderer":\{[^}]*"image":\{"uri":"(.*?)"/) || clean.match(/"owner":\{[^}]*\},"created_time":[0-9]+,"image":\{"uri":"(.*?)"/)
                     if (match) {
                         result = {
                             url,
@@ -68,7 +68,7 @@ export default new class Facebook {
                         url,
                         type: "video",
                         duration: Number(clean.match(/"playable_duration_in_ms":(\d+)/)?.[1] || 0),
-                        download: clean.match(/"browser_native_hd_url":"(.*?)"/)?.[1] ? this.parse(clean.match(/"browser_native_hd_url":"(.*?)"/)?.[1] || "") : this.parse(match[1]),
+                        download: clean ? this.parse(clean.match(/"browser_native_hd_url":"(.*?)"/)?.[1] || "") : this.parse(match[1]),
                         thumbnail: this.parse(clean.match(/"preferred_thumbnail":\{"image":\{"uri":"(.*?)"/)?.[1] || ""),
                         ...result
                     }
@@ -81,3 +81,6 @@ export default new class Facebook {
         })
     }
 }
+
+const fb = new Facebook()
+fb.download("https://www.facebook.com/reel/970927378342535").then(console.log).catch(console.error)
