@@ -68,7 +68,7 @@ export default new class Facebook {
                         url,
                         type: "video",
                         duration: Number(clean.match(/"playable_duration_in_ms":(\d+)/)?.[1] || 0),
-                        download: clean ? this.parse(clean.match(/"browser_native_hd_url":"(.*?)"/)?.[1] || "") : this.parse(match[1]),
+                        download: clean.match(/"browser_native_hd_url":"(.*?)"/)?.[1] ? this.parse(clean.match(/"browser_native_hd_url":"(.*?)"/)?.[1] || "") : this.parse(match[1]),
                         thumbnail: this.parse(clean.match(/"preferred_thumbnail":\{"image":\{"uri":"(.*?)"/)?.[1] || ""),
                         ...result
                     }
