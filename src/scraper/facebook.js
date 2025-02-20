@@ -1,7 +1,7 @@
 import Req from "./request.js"
 import fs from "fs"
 
-export default class Facebook {
+export default new  class Facebook {
     constructor() {
         this.parse = (str) => JSON.parse(`{"text": "${str}"}`).text
     }
@@ -81,6 +81,3 @@ export default class Facebook {
         })
     }
 }
-
-const fb = new Facebook()
-fb.download("https://www.facebook.com/reel/970927378342535").then(console.log).catch(console.error)
