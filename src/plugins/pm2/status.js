@@ -38,11 +38,12 @@ export default {
             const uptime = ((Date.now() - pm2_env.pm_uptime) / 1000).toFixed(0);
 
             return `🤖 *${name}* [${pm_id}]
-PID: ${pid} | 📶 Status: ${pm2_env.status}
-CPU: ${monit.cpu}% | 💾 RAM: ${formatMB(monit.memory)}MB
+PID: ${pid}
+Status: ${pm2_env.status}
+CPU: ${monit.cpu}%
+RAM: ${formatMB(monit.memory)}MB
 Uptime: ${convertTimeOut(uptime * 1000)}
-Node: ${pm2_env.node_version} | v${pm2_env.version}
-Latencia: ${p.axm_monitor?.['Event Loop Latency']?.value || 'N/A'}ms (p50) | ${p.axm_monitor?.['Event Loop Latency p95']?.value || 'N/A'}ms (p95)`
+Node: ${pm2_env.node_version} | v${pm2_env.version}s`
         }).join('\n\n');
 
         await sock.sendMessage(m.from, {

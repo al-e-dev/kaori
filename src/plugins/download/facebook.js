@@ -1,6 +1,16 @@
+import Facebook from "../../scraper/facebook"
+
 export default {
     name: 'facebook',
-    params: ['query'],
+    params: ['url'],
     description: 'Busca y descarga audio de Facebook',
-    comand: ['facebook', 'fb']
+    comand: ['facebook', 'fb'],
+    exec: async (m, { sock }) => {
+        const fb = Facebook.download(m.text)
+        if (fb.status) {
+            await sock.sendMessage(m.from, { [fb.type]: { url: fb.download, caption: fb.author } })
+        } else {
+            await sock.sendAlbumMessage(m.from, fb.images.map(img => ({ type: "image", data: { url: img } })), { caption: fb.author })
+        }
+    }
 }
