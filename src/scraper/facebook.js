@@ -1,4 +1,4 @@
-import Req from "./request.js"
+import Req from "./_request.js"
 import fs from "fs"
 
 export default new class Facebook {

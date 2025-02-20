@@ -7,7 +7,7 @@ import path from 'path'
 import child from 'child_process'
 import util from 'util'
 
-import Request from '../../scraper/request.js'
+import Req from '../../scraper/_request.js'
 
 import baileys, {
     generateWAMessageFromContent
