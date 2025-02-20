@@ -1,7 +1,7 @@
 import Req from "./request.js"
 import fs from "fs"
 
-export default new  class Facebook {
+export default  class Facebook {
     constructor() {
         this.parse = (str) => JSON.parse(`{"text": "${str}"}`).text
     }
@@ -34,16 +34,15 @@ export default new  class Facebook {
                 let match = clean.match(/"all_subattachments":\{"count":(\d+),"nodes":\[(.*?)\]\}/)
                 
                 if (match) {
-                    const images = (match[2].match(/"image":\{"uri":"(.*?)"/g) || [])
-                        .map(img => this.parse(img.match(/"image":\{"uri":"(.*?)"/)[1]))
+                    const images = (match[2].match(/"image":\{"uri":"(.*?)"/g) || []).map(img => this.parse(img.match(/"image":\{"uri":"(.*?)"/)[1]))
                     
                     result = {
                         url,
                         type: "image",
                         images,
                         creation: new Date(parseInt(data.match(/"creation_time":(\d+)/)?.[1]) * 1000).toLocaleString(),
-                        author: this.parse(clean.match(/"actors":\[.*?"name":"(.*?)"/)?.[1] || "Unknown"),
-                        title: this.parse(clean.match(/"story":\{"message":\{"text":"(.*?)"/)?.[1] || "Unknown")
+                        author: this.parse(clean.match(/"actors":\[.*?"name":"(.*?)"/)?.[1] || clean.match(/"owning_profile":\{"__typename":"User","name":"(.*?)","id":"(.*?)"\}/)?.[1] || "Unknown").replace(/\\"/g, '"'),
+                        title: this.parse(clean.match(/"story":\{"message":\{"text":"((?:\\.|[^"\\])*)"/)?.[1] || clean.match(/"message_preferred_body":\{"__typename":"TextWithEntities".*?"text":"(.*?)"/)?.[1] || clean.match(/"message":\{"text":"(.*?)"/)?.[1] || "Facebook Post").replace(/\\"/g, '"')
                     }
                 } else {
                     match = clean.match(/"comet_photo_attachment_resolution_renderer":\{[^}]*"image":\{"uri":"(.*?)"/) || clean.match(/"owner":\{[^}]*\},"created_time":[0-9]+,"image":\{"uri":"(.*?)"/)
@@ -53,13 +52,13 @@ export default new  class Facebook {
                             type: "image",
                             download: this.parse(match[1]),
                             creation: new Date(parseInt(data.match(/"creation_time":(\d+)/)?.[1]) * 1000).toLocaleString(),
-                            author: this.parse(clean.match(/"actors":\[.*?"name":"(.*?)"/)?.[1] || clean.match(/"owning_profile":\{"__typename":"User","name":"(.*?)","id":"(.*?)"\}/)?.[1] || "Unknown"),
-                            title: this.parse(clean.match(/"story":\{"message":\{"text":"(.*?)"/)?.[1] || clean.match(/"message_preferred_body":\{"__typename":"TextWithEntities".*?"text":"(.*?)"/)?.[1] || clean.match(/"message":\{"text":"(.*?)"/)?.[1] || "Facebook Post")
+                            author: this.parse(clean.match(/"actors":\[.*?"name":"(.*?)"/)?.[1] || clean.match(/"owning_profile":\{"__typename":"User","name":"(.*?)","id":"(.*?)"\}/)?.[1] || "Unknown").replace(/\\"/g, '"'),
+                            title: this.parse(clean.match(/"story":\{"message":\{"text":"(.*?)"/)?.[1] || clean.match(/"message_preferred_body":\{"__typename":"TextWithEntities".*?"text":"(.*?)"/)?.[1] || clean.match(/"message":\{"text":"(.*?)"/)?.[1] || "Facebook Post").replace(/\\"/g, '"')
                         }
                     }
                 }
                 
-                // fs.writeFileSync("resultado.txt", clean, "utf8")
+                fs.writeFileSync("resultado.txt", clean, "utf8")
                 
                 match = clean.match(/"browser_native_sd_url":"(.*?)"/) || clean.match(/"playable_url":"(.*?)"/) || clean.match(/sd_src\s*:\s*"([^"]*)"/) || clean.match(/(?<="src":")[^"]*(https:\/\/[^\"]*)/)
                         
@@ -77,7 +76,11 @@ export default new  class Facebook {
                 return Object.keys(result).length ? resolve({ status: true, ...result }) : reject("Unable to fetch video information at this time. Please try again")
             }).catch(err => {
                 reject(`Unable to fetch video information. Axios Error: ${err}`)
+                console.log(err)
             })
         })
     }
 }
+
+const fb = new Facebook()
+fb.download("https://www.facebook.com/share/164wXDwvFj/").then(console.log).catch(console.error)
