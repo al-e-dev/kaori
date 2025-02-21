@@ -1,7 +1,7 @@
 import Req from "./_request.js"
 import fs from "fs"
 
-export default class Threads {
+export default new class Threads {
     constructor() {
         this.parse = (str) => JSON.parse(`{"text": "${str}"}`).text
     }
@@ -24,104 +24,102 @@ export default class Threads {
                     accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
                 }
             }).then(({ data }) => {
-                const cleaned = data.replace(/&quot;/g, '"').replace(/&amp;/g, "&")
-                fs.writeFileSync("resultado.txt", cleaned, "utf8")
+                const cleaned =  (() => {
+                    const start = data.indexOf('"thread_items":');
+                    if (start === -1) return null;
+                    const a = data.indexOf('[', start);
+                    let c = 1, i = a + 1;
+                    while (i < data.length && c) {
+                        c += data[i] === '[' ? 1 : data[i] === ']' ? -1 : 0;
+                        i++;
+                    }
+                    return data.slice(a, i);
+                })()
+
+                const threads = (JSON.parse(cleaned))[0].post
+
+                // fs.writeFileSync("t.json", JSON.stringify(json, null, 2), "utf8")
 
                 let result = {
-                    title: this.parse(cleaned.match(/"caption":\{"text":"(.*?)"/)?.[1] || "Threads Post"),
-                    likes: this.parse(cleaned.match(/"like_count":\s*(\d+)/)?.[1]),
-                    repost: this.parse(cleaned.match(/"repost_count":\s*(\d+)/)?.[1]),
-                    reshare: this.parse(cleaned.match(/"reshare_count":\s*(\d+)/)?.[1]),
-                    comments: this.parse(cleaned.match(/"direct_reply_count":\s*(\d+)/)?.[1]),
-                    creation: this.parse(cleaned.match(/"taken_at":\s*(\d+)/)?.[1]),
+                    status: true,
+                    title: this.parse(threads.caption.text),
+                    likes: threads.like_count,
+                    repost: threads.text_post_app_info.repost_count,
+                    reshare: threads.text_post_app_info.reshare_count,
+                    comments: threads.text_post_app_info.direct_reply_count,
+                    creation: threads.taken_at,
                     author: {
-                        username: this.parse(cleaned.match(/"username":"(.*?)"/)?.[1]),
-                        profile: this.parse(cleaned.match(/"profile_pic_url":"(.*?)"/)?.[1])
+                        username: threads.user.username,
+                        profile_pic_url: threads.user.profile_pic_url,
+                        id: threads.user.id,
+                        is_verified: threads.user.is_verified
                     }
                 }
 
-                const isCarousel = ((m) => m ? JSON.parse(m[1]).length > 0 : false)(cleaned.match(/"carousel_media":\s*(\[[\s\S]*?\])\s*(,|$)/))
-                const isVideo = ((m) => m ? JSON.parse(m[1]).length > 0 : false)(cleaned.match(/"video_versions":\s*(\[[\s\S]*?\])\s*(,|$)/))
-                const isImage = ((m) => m ? m[1].trim() !== "null" : false)(cleaned.match(/"image_versions2":\s*(null|\{[\s\S]*?\})/))
-                const isAudio = ((m) => m && m[1].trim() !== "null" ? JSON.parse(m[1]) : null)(cleaned.match(/"audio":\s*(null|\{[\s\S]*?\})/))
-
-                const hasAudio = ((m) => m ? m[1] === "true" ? true : m[1] === "false" ? false : null : null)(cleaned.match(/"has_audio":\s*(true|false|null)/))
-
-                if (isVideo && hasAudio) {
-                    const video = cleaned.match(/"video_versions":\s*\[\s*\{\s*"type":\d+,\s*"url":"([^"]+)"/)?.[1]
+                if (threads.video_versions) {
                     return resolve({
                         ...result,
                         download: {
                             type: "video",
-                            width: +this.parse(cleaned.match(/"original_width":\s*(\d+)/)?.[1]),
-                            height: +this.parse(cleaned.match(/"original_height":\s*(\d+)/)?.[1]),
-                            url: this.parse(video)
+                            width: +threads.original_width,
+                            height: +threads.original_height,
+                            url: threads.video_versions[1].url
                         }
                     })
                 }
 
-                if (isAudio) {
+                if (threads.audio) {
                     return resolve({
                         ...result,
                         download: {
                             type: "audio",
-                            url: this.parse(isAudio.audio_src)
+                            url: threads.audio.audio_src
                         }
                     })
                 }
 
-                if (isCarousel) {
-                    const carousel = cleaned.match(/"carousel_media":\s*(\[[\s\S]*?\])\s*(,|$)/) || cleaned.match(/"carousel_media":\s*(\[[^\]]+\])/)
-                    const array = JSON.parse(carousel[1]);
-                    if (Array.isArray(array)) {
-                        const images = array.map(item => {
-                            const candidates = item?.image_versions2?.candidates;
-                            if (Array.isArray(candidates)) {
-                                const best = candidates.reduce((max, candidate) => candidate.width * candidate.height > max.width * max.height ? candidate : max, candidates[0])
-                                console.log(best)
-                                return {
-                                    type: "image",
-                                    width: +best.width,
-                                    height: +best.height,
-                                    url: best.url.replace(/\\/g, "")
-                                }
-                            }
-                            return null
-                        }).filter(Boolean)
-                        return resolve({ ...result, download: images })
-                    }
+                if (threads.carousel_media) {
+                    const media = threads.carousel_media.map((item) => {
+                        let type, url, height, width
+                        if (item.image_versions2) {
+                            url = item.image_versions2.candidates[0].url,
+                            type = "image",
+                            width = item.image_versions2.candidates[0].width,
+                            height = item.image_versions2.candidates[0].height
+                        }
+                        if (item.video_versions) {
+                            url = item.video_versions[1].url,
+                            type = "video"
+                            width = item.original_width,
+                            height = item.original_height
+                        }
+
+                        return {
+                            url,
+                            type,
+                            width,
+                            height
+                        }
+                    })
+                    return resolve({ ...result, download: media })
                 }
 
-                if (isImage) {
-                    const image = cleaned.match(/"image_versions2":\s*{"candidates":\s*\[(.*?)\]/s);
-                    const img = [...image[1].matchAll(/{"height":(\d+),"url":"(.*?)","width":(\d+)}/g)]
-                        .map(e => ({
-                            height: +e[1],
-                            width: +e[3],
-                            url: e[2].replace(/\\/g, "")
-                        }))
-                        .reduce((max, img) => (img.height * img.width > max.height * max.width ? img : max));
-
+                if (threads.image_versions2) {
                     return resolve({
                         ...result,
                         download: {
+                            url: threads.image_versions2.candidates[0].url,
                             type: "image",
-                            width: img.width,
-                            height: img.height,
-                            url: img.url
+                            width: threads.image_versions2.candidates[0].width,
+                            height: threads.image_versions2.candidates[0].height
                         }
-                    });
+                    })
                 }
 
-                
-
+                resolve({ status: false, url })
             }).catch(err => {
-                console.log(err)
                 reject(`Unable to fetch video information. Error: ${err.message}`)
             })
         })
     }
 }
-
-const th = new Threads()
-th.download("https://www.threads.net/@cbssportsgolazo/post/DGRlw2ZMv3Z?xmt=AQGzFMmLKSttkZtDs2r9awVNmWIUDIJm75q8fYZfcb4eJA").then(console.log).catch(console.error)
