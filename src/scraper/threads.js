@@ -42,7 +42,7 @@ export default new class Threads {
 
                 let result = {
                     status: true,
-                    title: this.parse(threads ? threads.caption.text : "Scraper" ),
+                    title: this.parse(threads.caption ? threads.caption?.text : "Scraper" ),
                     likes: threads.like_count || 0,
                     repost: threads.text_post_app_info.repost_count || 0,
                     reshare: threads.text_post_app_info.reshare_count || 0,
