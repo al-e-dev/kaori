@@ -42,17 +42,17 @@ export default new class Threads {
 
                 let result = {
                     status: true,
-                    title: this.parse(threads.caption.text),
-                    likes: threads.like_count,
-                    repost: threads.text_post_app_info.repost_count,
-                    reshare: threads.text_post_app_info.reshare_count,
-                    comments: threads.text_post_app_info.direct_reply_count,
-                    creation: threads.taken_at,
+                    title: this.parse(threads ? threads.recaption.text : "Scraper" ),
+                    likes: threads.like_count || 0,
+                    repost: threads.text_post_app_info.repost_count || 0,
+                    reshare: threads.text_post_app_info.reshare_count || 0,
+                    comments: threads.text_post_app_info.direct_reply_count || 0,
+                    creation: threads.taken_at || "",
                     author: {
-                        username: threads.user.username,
-                        profile_pic_url: threads.user.profile_pic_url,
-                        id: threads.user.id,
-                        is_verified: threads.user.is_verified
+                        username: threads.user.username || "",
+                        profile_pic_url: threads.user.profile_pic_url || "",
+                        id: threads.user.id || "",
+                        is_verified: threads.user.is_verified || false
                     }
                 }
 
