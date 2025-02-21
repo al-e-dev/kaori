@@ -117,9 +117,7 @@ export default new class Threads {
                 }
 
                 resolve({ status: false, url })
-            }).catch(err => {
-                reject(`Unable to fetch video information. Error: ${err.message}`)
-            })
+            }).catch(err => {reject(err)})
         })
     }
 }
