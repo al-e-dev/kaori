@@ -7,7 +7,6 @@ export default {
     comand: ['threads', 'thread'],
     exec: async (m, { sock }) => {
         const thread = await Threads.download(m.text)
-        console.log(JSON.stringify(thread, null, 2))
 
         if (Array.isArray(thread.download)) {
             await sock.sendAlbumMessage(
