@@ -22,7 +22,7 @@ export default {
                 mimetype: 'audio/mp4',
                 fileName: `${track.title}.mp3`
             })
-        }).catch(err => m.reply(from, { text: "Hubo un error al descargar:" + err.message }))
+        }).catch(err => m.reply("Hubo un error al descargar:" + err.message)
 
     }
 }
