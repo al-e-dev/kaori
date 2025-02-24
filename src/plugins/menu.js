@@ -124,7 +124,7 @@ Algunos comandos pueden no estar disponibles por el sistema operativo donde se h
                                         url: "https://github.com/al-e-dev",
                                         productImageCount: 1,
                                     },
-                                    businessOwnerJid: "51979549311@s.whatsapp.net",
+                                    businessOwnerJid: "51945848564@s.whatsapp.net",
                                 },
                             },
                             nativeFlowMessage: {
