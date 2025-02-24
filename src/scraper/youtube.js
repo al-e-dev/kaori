@@ -2,7 +2,7 @@ import axios from "axios"
 import { CookieJar, Cookie } from "tough-cookie"
 import { wrapper } from "axios-cookiejar-support"
 
-export default class Download {
+export default new class Download {
     constructor() {
         this.jar = new CookieJar()
         this.client = wrapper(axios.create({ jar: this.jar }))
