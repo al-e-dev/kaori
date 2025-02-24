@@ -101,49 +101,48 @@ const start = async () => {
     })
 
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
-        if (type === 'notify') {
-            let m = await _content(sock, messages)
+        for (let i = 0; i < messages.length; i++) {
+            if (type === 'notify' && messages[i].message) {
+                let m = await _content(sock, messages[i])
+                let v = m.quoted ? m.quoted : m
+                let lang = db.data.users[m.sender] ? Lang[db.data.users[m.sender].language] : Lang[db.data.settings[sock.user.jid]?.language]
+                let args = { sock, db, v, lang, delay }
 
-            console.log(JSON.stringify(m, null, 2))
-            let v = m.quoted ? m.quoted : m
-            let lang = db.data.users[m.sender] ? Lang[db.data.users[m.sender].language] : Lang[db.data.settings[sock.user.jid]?.language]
-            let args = { sock, db, v, lang, delay }
+                if (!m.isMe && m.message && !m.id.startsWith("ALE-DEV") && !m.id.startsWith("BAE5")) {
+                    if (db.data.chats[m.from]?.antidelete) {
+                        db.data.chats[m.from].cache ||= []
+                        db.data.chats[m.from].cache.push({ key: m.key, message: m.message, timestamp: Date.now() })
+                        db.data.chats[m.from].cache = db.data.chats[m.from].cache.filter(item => Date.now() - item.timestamp < 1200000)
+                    }
+                }
 
-            if (!m.isMe && m.message && !m.id.startsWith("ALE-DEV") && !m.id.startsWith("BAE5")) {
-                if (db.data.chats[m.from]?.antidelete) {
-                    db.data.chats[m.from].cache ||= []
-                    db.data.chats[m.from].cache.push({ key: m.key, message: m.message, timestamp: Date.now() })
-                    db.data.chats[m.from].cache = db.data.chats[m.from].cache.filter(item => Date.now() - item.timestamp < 1200000)
+                for (const plugin of global.plugins) {
+                    if (!plugin.disable && plugin.comand ? (Array.isArray(plugin.comand) ? plugin.comand.includes(m.command) : plugin.comand.test(m.body)) : undefined) {
+
+                        if (plugin.isOwner && !m.isOwner) continue
+                        if (db.data.settings[sock.user.jid]?.private && !m.isOwner) continue
+                        if (db.data.chats[m.from]?.mute && !m.isAdmin && !m.isOwner) continue
+
+                        if (plugin.isAdmin && !m.isAdmin) return m.reply("*Este comando solo está disponible para administradores del grupo.*")
+                        if (plugin.isBotAdmin && !m.isBotAdmin) return m.reply("*El bot necesita ser administrador para ejecutar este comando.*")
+
+                        if (plugin.isPrivate && m.isGroup) return m.reply("*Este comando solo puede ser usado en chats privados.*")
+                        if (plugin.isGroup && !m.isGroup) return m.reply("*Este comando solo está disponible para grupos.*")
+
+                        if (plugin.os && platform === 'win32') return m.reply(`*Este comando no está disponible debido a la incompatibilidad del sistema operativo en el que se ejecuta ${_config.bot.name}.*`)
+                        if (plugin.params && plugin.params.length > 0 && !plugin.params.every(param => m.text && m.text.split(' ')[plugin.params.indexOf(param)])) return m.reply(`*Por favor, proporcione los parámetros requeridos: ${plugin.params.map(p => `[${p}]`).join(' ')}.*`)
+                        if (plugin.isQuoted && !m.quoted) return m.reply("*Por favor, responda a un mensaje para usar este comando.*")
+                        if (plugin.isMedia && !plugin.isMedia?.includes(v.type.replace('Message', ''))) return m.reply(`*Por favor, adjunte un contenido multimedia de tipo ${plugin.isMedia.length === 1 ? plugin.isMedia[0] : plugin.isMedia.slice(0, -1).join(', ') + ' o ' + plugin.isMedia.slice(-1)} para procesar su solicitud.*`);
+
+                        if (plugin.exec && typeof plugin.exec === 'function') {
+                            await plugin.exec.call(plugin, m, args).catch(error => {
+                                sock.sendMessage(m.from, { text: `Error al ejecutar el plugin: ${error}` })
+                                console.error(error)
+                            })
+                        } else if (!plugin.exec) m.reply(`*El comando ${plugin.name} se encuentra en desarrollo, lo que significa que estamos trabajando activamente en su optimización y ampliación de funcionalidades.*`)
+                    }
                 }
             }
-
-            for (const plugin of global.plugins) {
-                if (!plugin.disable && plugin.comand ? (Array.isArray(plugin.comand) ? plugin.comand.includes(m.command) : plugin.comand.test(m.body)) : undefined) {
-
-                    if (plugin.isOwner && !m.isOwner) continue
-                    if (db.data.settings[sock.user.jid]?.private && !m.isOwner) continue
-                    if (db.data.chats[m.from]?.mute && !m.isAdmin && !m.isOwner) continue
-
-                    if (plugin.isAdmin && !m.isAdmin) return m.reply("*Este comando solo está disponible para administradores del grupo.*")
-                    if (plugin.isBotAdmin && !m.isBotAdmin) return m.reply("*El bot necesita ser administrador para ejecutar este comando.*")
-
-                    if (plugin.isPrivate && m.isGroup) return m.reply("*Este comando solo puede ser usado en chats privados.*")
-                    if (plugin.isGroup && !m.isGroup) return m.reply("*Este comando solo está disponible para grupos.*")
-
-                    if (plugin.os && platform === 'win32') return m.reply(`*Este comando no está disponible debido a la incompatibilidad del sistema operativo en el que se ejecuta ${_config.bot.name}.*`)
-                    if (plugin.params && plugin.params.length > 0 && !plugin.params.every(param => m.text && m.text.split(' ')[plugin.params.indexOf(param)])) return m.reply(`*Por favor, proporcione los parámetros requeridos: ${plugin.params.map(p => `[${p}]`).join(' ')}.*`)
-                    if (plugin.isQuoted && !m.quoted) return m.reply("*Por favor, responda a un mensaje para usar este comando.*")
-                    if (plugin.isMedia && !plugin.isMedia?.includes(v.type.replace('Message', ''))) return m.reply(`*Por favor, adjunte un contenido multimedia de tipo ${plugin.isMedia.length === 1 ? plugin.isMedia[0] : plugin.isMedia.slice(0, -1).join(', ') + ' o ' + plugin.isMedia.slice(-1)} para procesar su solicitud.*`);
-
-                    if (plugin.exec && typeof plugin.exec === 'function') {
-                        await plugin.exec.call(plugin, m, args).catch(error => {
-                            sock.sendMessage(m.from, { text: `Error al ejecutar el plugin: ${error}` })
-                            console.error(error)
-                        })
-                    } else if (!plugin.exec) m.reply(`*El comando ${plugin.name} se encuentra en desarrollo, lo que significa que estamos trabajando activamente en su optimización y ampliación de funcionalidades.*`)
-                }
-            }
-
         }
     })
 
