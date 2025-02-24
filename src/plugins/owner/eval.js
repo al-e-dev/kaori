@@ -8,6 +8,7 @@ import child from 'child_process'
 import util from 'util'
 
 import Req from '../../scraper/_request.js'
+import Yt from "../../scraper/youtube.js"
 
 import baileys, {
     generateWAMessageFromContent
