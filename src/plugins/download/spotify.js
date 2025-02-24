@@ -11,7 +11,6 @@ export default {
 
         const track = results[0]
         Spotify.download(track.url).then(async ({ download }) => {
-
             await sock.sendMessage(m.from, {
                 image: await Convert.spotify(track.title, track.artist.map(a => a.name).join(', '), track.thumbnail),
                 caption: `*Title:* ${track.title}\n*Artist:* ${track.artist.map(a => a.name).join(', ')}\n*Duration:* ${track.duration}\n*Popularity:* ${track.popularity}\n*Release Date:* ${track.date}`
@@ -22,7 +21,7 @@ export default {
                 mimetype: 'audio/mp4',
                 fileName: `${track.title}.mp3`
             })
-        })
+        }).catch(err => m.reply(from, { text: "Hubo un error al descargar:" + err.message }))
 
     }
 }
