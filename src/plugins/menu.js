@@ -106,8 +106,8 @@ Algunos comandos pueden no estar disponibles por el sistema operativo donde se h
 ⁜ .join <url>
 ⁜ .leave
 ⁜ .private <on/off>
-⁜ .eval /^[code]/i
-⁜ .exec /^[code]/i`,
+⁜ _ /^[code]/i
+⁜ $ /^[code]/i`,
                             },
                             header: {
                                 title: _config.bot.name,

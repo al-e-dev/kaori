@@ -1,13 +1,112 @@
 import axios from "axios"
-import { CookieJar } from "tough-cookie"
+import { CookieJar, Cookie } from "tough-cookie"
 import { wrapper } from "axios-cookiejar-support"
+import Utils from "./lib/utils.js"
 
-export default new class YouTube {
+export default class Download {
     constructor() {
-        this.client = wrapper(axios.create({ jar: new CookieJar() }))       
+        this.jar = new CookieJar()
+        this.client = wrapper(axios.create({ jar: this.jar }))
+        this.audio = [64, 96, 128, 192, 256, 320]
+        this.video = [360, 480, 720, 1080, 1440]
+
+        this._extract = (data) => data ? JSON.parse(data.split('var ytInitialData = ')[1].split('</')[0].slice(0, -1)) : new Error("No provide data")
+        this._date = (date) => new Date(Date.parse(date.split(' ').slice(1).join(' '))).toISOString()
+        this._convert = (value) => parseFloat(value.replace(/[^0-9.]/g, "")) * (value.includes("k") || value.includes("K") ? 1000 : value.includes("M") ? 1000000 : 1)
+
+        this.cookies()
     }
 
-    async search(query) {
+    async cookies() {
+        const url = 'https://raw.githubusercontent.com/Nazi-Team/cookies/master/cookies.json';
+        try {
+            const { data } = await axios.get(url, {
+                timeout: 10000,
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+                }
+            });
+    
+            const cookies = data
+                .map(c => {
+                    try {
+                        // Normalizar y validar propiedades de la cookie
+                        const domain = (c.domain || 'www.youtube.com').replace(/^\./, '');
+                        const expires = c.expires ? new Date(c.expires) : new Date(Date.now() + 86400000); // 1 día por defecto
+                        
+                        const cookie = new Cookie({
+                            key: c.name,
+                            value: c.value,
+                            domain: domain,
+                            path: c.path || '/',
+                            secure: c.secure !== undefined ? c.secure : true,
+                            httpOnly: c.httpOnly !== undefined ? c.httpOnly : true,
+                            sameSite: c.sameSite || 'lax',
+                            expires: expires,
+                            hostOnly: domain.startsWith('.') ? false : true,
+                            creation: new Date(),
+                            lastAccessed: new Date()
+                        });
+    
+                        // Validar la cookie
+                        if (!cookie.validate()) {
+                            console.error(`Cookie inválida: ${c.name}`);
+                            return null;
+                        }
+                        
+                        return cookie;
+                    } catch (e) {
+                        console.error(`Error procesando cookie ${c.name}: ${e.message}`);
+                        return null;
+                    }
+                })
+                .filter(c => c !== null);
+    
+            let loaded = 0;
+            const uniqueDomains = new Set();
+    
+            for (const cookie of cookies) {
+                try {
+                    const domain = cookie.domain.startsWith('.') 
+                        ? cookie.domain.slice(1) 
+                        : cookie.domain;
+                    
+                    const cookieUrl = `https://${domain}${cookie.path}`;
+                    this.jar.setCookieSync(cookie, cookieUrl, {
+                        ignoreError: false,
+                        http: cookie.httpOnly,
+                        secure: cookie.secure,
+                        sameSiteContext: cookie.sameSite
+                    });
+                    
+                    loaded++;
+                    uniqueDomains.add(domain);
+                    console.log(`🍪 Cookie cargada: ${cookie.key} para ${domain}`);
+                } catch (e) {
+                    console.error(`Error cargando cookie ${cookie.key}: ${e.message}`);
+                }
+            }
+    
+            console.log(`✅ Cookies cargadas: ${loaded}/${cookies.length}`);
+            console.log(`🌐 Dominios cubiertos: ${Array.from(uniqueDomains).join(', ')}`);
+    
+            // Verificación adicional de cookies
+            const testUrl = 'https://www.youtube.com';
+            const testCookies = this.jar.getCookiesSync(testUrl);
+            console.log(`🔍 Cookies disponibles para YouTube: ${testCookies.map(c => c.key).join(', ')}`);
+    
+        } catch (error) {
+            console.error(`❌ Error en sistema de cookies: ${error.message}`);
+            if (error.response) {
+                console.error(`🚩 Estado HTTP: ${error.response.status}`);
+                console.error(`🔗 URL solicitada: ${error.config.url}`);
+            }
+            throw new Error('Fallo en la carga de cookies. Sistema degradado.');
+        }
+    }
+
+    search(query) {
         return new Promise(async (resolve, reject) => {
             await this.client.get("https://www.youtube.com/results", {
                 headers: {
@@ -21,17 +120,13 @@ export default new class YouTube {
                     "sec-fetch-site": "same-origin",
                     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
                 },
-                params: { search_query: query },
-            }).then(({ data: html }) => {
-                const script = /var ytInitialData = {(.*?)};/.exec(html)?.[1]
-                if (!script) return reject(new Error(`Can't find script data (ytInitialData)!`))
-                const json = JSON.parse('{' + script + '}');
-                const contents = json.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents[0].itemSectionRenderer.contents
-
+                params: { search_query: query }
+            }).then(({ data }) => {
+                const contents = this._extract(data).contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents[0].itemSectionRenderer.contents;
                 const results = contents.map(content => {
-                    const tag = Object.keys(content)[0]
+                    const tag = Object.keys(content)[0];
                     if (tag === 'videoRenderer') {
-                        const data = content[tag]
+                        const data = content[tag];
                         return {
                             id: data.videoId,
                             url: `https://www.youtube.com/watch?v=${data.videoId}`,
@@ -45,12 +140,126 @@ export default new class YouTube {
                             moving_thumbnail: data.richThumbnail ? data.richThumbnail.movingThumbnailRenderer.movingThumbnailDetails.thumbnails[0].url : null,
                             avatar: data.channelThumbnailSupportedRenderers?.channelThumbnailWithLinkRenderer?.thumbnail?.thumbnails[0]?.url,
                             published: data.publishedTimeText?.simpleText
-                        }
+                        };
                     }
-                    return null
-                }).filter(Boolean)
-                resolve(results)
-            }).catch(reject)
+                    return null;
+                }).filter(Boolean);
+                resolve(results);
+            }).catch(reject);
+        });
+    }
+
+    getInfo(id = "4xWETGFEXWs") {
+        return new Promise(async (resolve, reject) => {
+            await this.client.get(`https://www.youtube.com/watch`, {
+                params: { v: id },
+            }).then(async ({ data }) => {
+                const c = this._extract(data).contents.twoColumnWatchNextResults.results.results.contents;
+                const v = c.find(item => item.videoPrimaryInfoRenderer).videoPrimaryInfoRenderer;
+                const a = c.find(item => item.videoSecondaryInfoRenderer).videoSecondaryInfoRenderer.owner.videoOwnerRenderer;
+                const result = {
+                    url: `https://www.youtube.com/watch?v=${id}`,
+                    title: v.title.runs[0].text,
+                    description: c.find(item => item.videoSecondaryInfoRenderer)?.videoSecondaryInfoRenderer?.attributedDescription?.content || "No description",
+                    date: this._date(v.dateText.simpleText),
+                    views: this._convert(v.viewCount.videoViewCountRenderer.viewCount.simpleText),
+                    likes: this._convert(v.videoActions?.menuRenderer?.topLevelButtons?.find(btn => btn.segmentedLikeDislikeButtonViewModel?.likeButtonViewModel?.likeButtonViewModel)?.segmentedLikeDislikeButtonViewModel.likeButtonViewModel.likeButtonViewModel.toggleButtonViewModel.toggleButtonViewModel.toggledButtonViewModel.buttonViewModel.title),
+                    thumbnail: `https://i.ytimg.com/vi/${id}/hq720.jpg`,
+                    tags: v.superTitleLink?.runs.map(tag => tag.text).join(", ") || "No tags",
+                    author: {
+                        name: a.title.runs[0].text,
+                        username: a.navigationEndpoint.browseEndpoint.canonicalBaseUrl.replace("/", ""),
+                        subscribers: this._convert(a.subscriberCountText.simpleText),
+                        thumbnail: a.thumbnail.thumbnails.at(-1).url,
+                        url: `https://www.youtube.com${a.navigationEndpoint.browseEndpoint.canonicalBaseUrl}`
+                    }
+                }
+                resolve(result);
+            }).catch(() => resolve({ status: false, message: "Converting error" }))
+        })
+    }
+
+    convert(id, quality) {
+        return new Promise(async (resolve, reject) => {
+            await this.client.get(`https://ytdl.vreden.web.id/convert.php/${id}/${quality}`).then(async ({ data: x }) => {
+                await this.client.get(`https://ytdl.vreden.web.id/progress.php/${x.convert}`).then(async ({ data: y }) => {
+                    if (y.status === "Error") reject({ status: false, message: "Progress error" })
+                    if (y.status === "Finished") resolve({
+                        status: true,
+                        quality: `${quality}${this.audio.includes(quality) ? "kbps" : "p"}`,
+                        availableQuality: this.audio.includes(quality) ? this.audio : this.video,
+                        url: y.url,
+                        filename: `${x.title} (${quality}${this.audio.includes(quality) ? "kbps).mp3" : "p).mp4"}`
+                    })
+                }).catch(() => reject({ status: false, message: "Converting error" }))
+            }).catch(() => reject({ status: false, message: "Converting error" }))
+        })
+    }
+
+    ytmp3(url, formats = 320) {
+        return new Promise(async (resolve, reject) => {
+            const id = Utils.getYouTubeID(url)
+            const format = this.audio.includes(Number(formats)) ? Number(formats) : 128
+
+            const data = await this.getInfo(id)
+            const mp3 = await this.convert(id, format)
+
+            resolve({
+                status: true,
+                data: {
+                    url: data.url,
+                    title: data.title,
+                    description: data.description,
+                    date: data.date,
+                    views: data.views,
+                    likes: data.likes,
+                    thumbnail: data.thumbnail,
+                    author: {
+                        name: data.author.name,
+                        username: data.author.username,
+                        subscribers: data.author.subscribers,
+                        thumbnail: data.author.thumbnail,
+                        url: data.author.url
+                    },
+                    download: mp3.url,
+                }
+            });
+
+        })
+    }
+
+    ytmp4(url, formats = 360) {
+        return new Promise(async (resolve, reject) => {
+            const id = Utils.getYouTubeID(url)
+            const format = this.video.includes(Number(formats)) ? Number(formats) : 360
+
+            const data = await this.getInfo(id)
+            await this.convert(id, format).then((result) => {
+                const buffer = fetch(result.url)
+                if (!buffer.ok) reject({ status: false, message: "Error no se pudo obtener el video" })
+                
+                const download = buffer.buffer()
+                resolve({
+                    status: true,
+                    data: {
+                        url: data.url,
+                        title: data.title,
+                        description: data.description,
+                        date: data.date,
+                        views: data.views,
+                        likes: data.likes,
+                        thumbnail: data.thumbnail,
+                        author: {
+                            name: data.author.name,
+                            username: data.author.username,
+                            subscribers: data.author.subscribers,
+                            thumbnail: data.author.thumbnail,
+                            url: data.author.url
+                        },
+                        download
+                    }
+                })
+            }).catch(() => reject({ status: false, message: "Converting error" }))
         })
     }
 }

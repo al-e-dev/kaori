@@ -16,7 +16,7 @@ export default new class Threads {
                     "sec-fetch-dest": "document",
                     "sec-fetch-mode": "navigate",
                     "cache-control": "max-age=0",
-                    authority: "www.threads.net",
+                    authority: "www.x.net",
                     "upgrade-insecure-requests": "1",
                     "accept-language": "en-GB,en;q=0.9,tr-TR;q=0.8,tr;q=0.7,en-US;q=0.6",
                     "sec-ch-ua": '"Google Chrome";v="89", "Chromium";v="89", ";Not A Brand";v="99"',
