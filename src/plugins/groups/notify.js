@@ -1,6 +1,6 @@
 export default {
     name: 'notify',
-    params: [on/off],
+    params: ['on/off'],
     description: 'Activa o desactiva las notificaciones en el grupo',
     comand: ['notify'],
     exec: async (m, { sock, db }) => {

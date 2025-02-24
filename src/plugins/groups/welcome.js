@@ -1,6 +1,6 @@
 export default {
     name: 'welcome',
-    params: [on/off],
+    params: ['on/off'],
     description: 'Activa o desactiva la bienvenida en el grupo',
     comand: ['welcome'],
     exec: async (m, { sock, db }) => {
