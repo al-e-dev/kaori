@@ -70,7 +70,7 @@ const start = async () => {
 
 
             msg && sock.sendMessage(id, {
-                image: { url: "./src/media/spotify.png" },
+                image: { url: "./src/media/welcome.png" },
                 caption: text,
                 contextInfo: {
                     mentionedJid: [p, author],
