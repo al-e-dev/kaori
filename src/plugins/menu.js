@@ -114,17 +114,17 @@ Algunos comandos pueden no estar disponibles por el sistema operativo donde se h
                                 hasMediaAttachment: true,
                                 productMessage: {
                                     product: {
-                                        productImage: await image("./nazi.jpg"),
+                                        productImage: await image("https://files.catbox.moe/q2wknc.png"),
                                         productId: "8363525327041213",
                                         title: convertTimeOut(process.uptime() * 1000),
                                         description: "created by " + _config.owner.name,
                                         currencyCode: "MXN",
                                         priceAmount1000: "250000",
-                                        retailerId: "nazi-team-bot",
-                                        url: "https://github.com",
+                                        retailerId: "4144242",
+                                        url: "https://github.com/al-e-dev",
                                         productImageCount: 1,
                                     },
-                                    businessOwnerJid: "573013116003@s.whatsapp.net",
+                                    businessOwnerJid: "51979549311@s.whatsapp.net",
                                 },
                             },
                             nativeFlowMessage: {

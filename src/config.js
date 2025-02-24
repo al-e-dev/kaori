@@ -8,12 +8,12 @@ global.require = createRequire(import.meta.url)
 global.origen = path.dirname(fileURLToPath(import.meta.url))
 global._config = {
     owner: {
-        number: "573234097278",
-        name: "Pineda",
+        number: "51968374620",
+        name: "Alexito",
         img: "https://files.catbox.moe/3m9yzl.jpg"
     },
     bot: {
-        name: "𝐍𝐀𝐙𝐈 • 𝐁𝐎𝐓",
+        name: "Kaori Network",
         version: "1.0",
         hd: "https://files.catbox.moe/kkdvjl.jpg",
         img: "https://files.catbox.moe/ahdtgk.jpg"
