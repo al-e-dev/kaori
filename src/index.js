@@ -67,12 +67,10 @@ const start = async () => {
                     '@desc': desc
                 }[m]))
 
-            const image = await sock.profilePictureUrl(p, 'image')
-                .catch(() => sock.profilePictureUrl(id, 'image'))
-                .catch(() => _config.bot.hd);
+
 
             msg && sock.sendMessage(id, {
-                image: { url: image },
+                image: { url: "./src/media/spotify.png" },
                 caption: text,
                 contextInfo: {
                     mentionedJid: [p, author],
