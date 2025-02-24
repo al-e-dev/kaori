@@ -6,9 +6,11 @@ export default {
     params: ['query'],
     description: 'Busca y descarga audio de spotify',
     comand: ['spotify'],
-    exec: (m, { sock }) => {
-        const track = Spotify.search(m.text)
-        Spotify.download(spotify[0].url).then(async ({ download }) => {
+    exec: async (m, { sock }) => {
+        const results = await Spotify.search(m.text)
+
+        const track = results[0]
+        Spotify.download(track.url).then(async ({ download }) => {
 
             await sock.sendMessage(m.from, {
                 image: { url: await Convert.spotify(track.title, track.artist.map(a => a.name).join(', '), track.thumbnail) },
