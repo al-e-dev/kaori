@@ -1,7 +1,6 @@
 import axios from "axios"
 import { CookieJar, Cookie } from "tough-cookie"
 import { wrapper } from "axios-cookiejar-support"
-import Utils from "./lib/utils.js"
 
 export default class Download {
     constructor() {
@@ -15,6 +14,23 @@ export default class Download {
         this._convert = (value) => parseFloat(value.replace(/[^0-9.]/g, "")) * (value.includes("k") || value.includes("K") ? 1000 : value.includes("M") ? 1000000 : 1)
 
         this.cookies()
+    }
+
+    getYouTubeID(input) {
+        if (!input) return null
+        const url = new URL(input)
+        const { hostname, pathname, searchParams } = url
+        const valid = /^(www\.|m\.)?youtube\.(com|co)$|youtu\.be$/.test(hostname)
+        if (!valid) return input;
+
+        if (hostname === 'youtu.be') return pathname.split('/')[1] || input
+
+        const [, , section, id] = pathname.split('/')
+        return section === 'shorts' ? id : searchParams.get('v') || (() => {
+            if (['/watch', 'channel', 'user'].some(p => p === pathname || section === p)) return null
+            return section === 'playlist' ? searchParams.get('list') : input
+        })()
+
     }
 
     async cookies() {
@@ -198,7 +214,7 @@ export default class Download {
 
     ytmp3(url, formats = 320) {
         return new Promise(async (resolve, reject) => {
-            const id = Utils.getYouTubeID(url)
+            const id = getYouTubeID(url)
             const format = this.audio.includes(Number(formats)) ? Number(formats) : 128
 
             const data = await this.getInfo(id)
@@ -230,7 +246,7 @@ export default class Download {
 
     ytmp4(url, formats = 360) {
         return new Promise(async (resolve, reject) => {
-            const id = Utils.getYouTubeID(url)
+            const id = getYouTubeID(url)
             const format = this.video.includes(Number(formats)) ? Number(formats) : 360
 
             const data = await this.getInfo(id)
