@@ -104,6 +104,8 @@ const start = async () => {
         for (let i = 0; i < messages.length; i++) {
             if (type === 'notify' && messages[i].message) {
                 let m = await _content(sock, messages[i])
+
+                console.log(JSON.stringify(m, null, 2))
                 let v = m.quoted ? m.quoted : m
                 let lang = db.data.users[m.sender] ? Lang[db.data.users[m.sender].language] : Lang[db.data.settings[sock.user.jid]?.language]
                 let args = { sock, db, v, lang, delay }
