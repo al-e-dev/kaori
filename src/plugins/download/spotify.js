@@ -11,7 +11,7 @@ export default {
         Spotify.download(spotify[0].url).then(async ({ download }) => {
 
             await sock.sendMessage(m.from, {
-                image: { url: Convert.spotify(track.title, track.artist.map(a => a.name).join(', '), track.thumbnail) },
+                image: { url: await Convert.spotify(track.title, track.artist.map(a => a.name).join(', '), track.thumbnail) },
                 caption: `*Title:* ${track.title}\n*Artist:* ${track.artist.map(a => a.name).join(', ')}\n*Duration:* ${track.duration}\n*Popularity:* ${track.popularity}\n*Release Date:* ${track.date}`
             })
 
