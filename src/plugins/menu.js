@@ -115,11 +115,11 @@ Algunos comandos pueden no estar disponibles por el sistema operativo donde se h
                                 productMessage: {
                                     product: {
                                         productImage: await image("https://files.catbox.moe/q2wknc.png"),
-                                        productId: "8363525327041213",
+                                        productId: "28628459430133161",
                                         title: convertTimeOut(process.uptime() * 1000),
                                         description: "created by " + _config.owner.name,
-                                        currencyCode: "MXN",
-                                        priceAmount1000: "250000",
+                                        currencyCode: "PEN",
+                                        priceAmount1000: "500000",
                                         retailerId: "4144242",
                                         url: "https://github.com/al-e-dev",
                                         productImageCount: 1,
