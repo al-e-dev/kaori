@@ -2,7 +2,7 @@ import axios from "axios";
 import { CookieJar } from "tough-cookie";
 import { wrapper } from "axios-cookiejar-support"
 
-export default class Spotify {
+export default new class Spotify {
     constructor() {
         this.baseUrl = 'https://api.fabdl.com'
         this.client = wrapper(axios.create({ jar: new CookieJar() }))
