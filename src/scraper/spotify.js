@@ -2,8 +2,6 @@ import axios from "axios";
 import { CookieJar } from "tough-cookie";
 import { wrapper } from "axios-cookiejar-support"
 
-import { chromium } from 'playwright'
-
 export default class Spotify {
     constructor() {
         this.baseUrl = 'https://api.fabdl.com'
