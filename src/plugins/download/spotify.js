@@ -10,19 +10,26 @@ export default {
         const results = await Spotify.search(m.text)
 
         const track = results[0]
+        const image = await Convert.spotify(track.title, track.artist.map(a => a.name).join(', '), track.thumbnail)
+        await sock.sendMessage(m.from, {
+            image: image,
+            caption: `*Title:* ${track.title}\n*Artist:* ${track.artist.map(a => a.name).join(', ')}\n*Duration:* ${track.duration}\n*Popularity:* ${track.popularity}\n*Release Date:* ${track.date}`
+        })
         Spotify.download(track.url).then(async ({ download }) => {
-            const image = await Convert.spotify(track.title, track.artist.map(a => a.name).join(', '), track.thumbnail)
-            await sock.sendMessage(m.from, {
-                image: image,
-                caption: `*Title:* ${track.title}\n*Artist:* ${track.artist.map(a => a.name).join(', ')}\n*Duration:* ${track.duration}\n*Popularity:* ${track.popularity}\n*Release Date:* ${track.date}`
-            })
-
             await sock.sendMessage(m.from, {
                 audio: { url: download },
                 mimetype: 'audio/mp4',
                 fileName: `${track.title}.mp3`
             })
-        }).catch(err => m.reply("Hubo un error al descargar:" + err.message))
+        }).catch(async (e) => {
+            Spotify.downloadV2(track.url).then(async data => {
+                await sock.sendMessage(m.from, {
+                    audio: { url: data },
+                    mimetype: 'audio/mp4',
+                    fileName: `${track.title}.mp3`
+                })
+            })
+        })
 
     }
 }
