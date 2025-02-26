@@ -1,3 +1,4 @@
+import { format } from "util"
 import Twitter from "../../scraper/x.js"
 
 export default {
@@ -7,7 +8,7 @@ export default {
     comand: ['x', 'twitter'],
     exec: async (m, { sock }) => {
         await Twitter.download(m.text).then((data) => {
-            m.reply(JSON.parse(data))
+            m.reply(format(data))
         }).catch(err => m.reply(err.message))
     }
 }
