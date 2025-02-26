@@ -47,7 +47,7 @@ const start = async () => {
 		if (connection == "close") {
 			let reason = new Boom(lastDisconnect?.error)?.output?.statuscode
 			if (reason == DisconnectReason.badSession) {
-                console.log(chalk.bgRed(`[ ${Time} ] Se daño la carpeta ${global.name_sessions}, borre la carpeta y escanee el QR nuevamente.`));
+                console.log(chalk.bgRed(`[ ${Time} ] Se daño la carpeta auth, borre la carpeta y escanee el QR nuevamente.`));
                 process.exit()
             } else if (reason == DisconnectReason.connectionClosed) {
                 console.log(chalk.bgRed(`[ ${Time} ] Se cerro la conexion conectando de nuevo`))
@@ -58,7 +58,7 @@ const start = async () => {
             } else if (reason == DisconnectReason.connectionReplaced) {
                 console.log(chalk.bgRed(`[ ${Time} ] Se creo una nueva sesion y reemplazo la actual, revise y escanee nuevamente el QR`))
                 process.exit()
-            } else if (reason == DisconnectReason.loggedOut) { console.log(chalk.bgRed(`[ ${Time} ] El dispositivo se desvinculo, borre la carpeta ${info.name_sessions} y escanee el codigo QR nuevamente.`))
+            } else if (reason == DisconnectReason.loggedOut) { console.log(chalk.bgRed(`[ ${Time} ] El dispositivo se desvinculo, borre la carpeta auth y escanee el codigo QR nuevamente.`))
                 process.exit()
             } else if (reason == DisconnectReason.restartRequired) {
                 console.log(chalk.bgRed(`[ ${Time} ] Es necesario reiniciar, se reiniciara automaticamente aguarde...`))
