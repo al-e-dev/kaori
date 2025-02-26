@@ -6,7 +6,8 @@ export default {
     description: 'Busca y descarga audio de x',
     comand: ['x', 'twitter'],
     exec: async (m, { sock }) => {
-        const X = Twitter.download(m.text)
-        m.reply(JSON.stringify(X, null, 2))
+        await Twitter.download(m.text).then((data) => {
+            m.reply(JSON.stringify(data, null, 2))
+        }).catch(err => m.reply(err.message))
     }
 }
