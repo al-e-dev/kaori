@@ -40,8 +40,8 @@ const start = async () => {
     if (!sock.authState.creds.registered) {
         console.log(`Emparejamiento con este código: ${await sock.requestPairingCode(await question("Ingresa tu número de WhatsApp activo: "))}`)
     }
-
-    client.ev.on("connection.update", async({ connection, lastDisconnect}) => {
+    
+    sock.ev.on("connection.update", ({ connection, lastDisconnect }) => {
         const date = new Date()
         const Time = `${date.getHours()}:${date.getMinutes()}`
 		if (connection == "close") {
@@ -70,20 +70,7 @@ const start = async () => {
 			else { 
 				console.log(chalk.bgRed(`[ ${Time} ] Error de desconexion desconocido: ${reason}||${connection}`))
 			}
-		} if (connection == "open") {
-			mongoose.connect(`mongodb+srv://alexito:alexito1638@serverdatadb.39fv13g.mongodb.net/aiwbot?retryWrites=true&w=majority&appName=ServerDataDB`)
-				.then(() => { console.log('Base de datos conectada') })
-				.catch((e) => { console.error('Error al conectar con la base de datos: ', e) })
-			console.log(`Sistema en linea.`);
-		};
-	})
-
-    sock.ev.on("connection.update", ({ connection, lastDisconnect }) => {
-        if (connection === "close") {
-            const reconect = (lastDisconnect.error)?.output?.statusCode !== DisconnectReason.loggedOut
-            console.log("Error en la conexión", lastDisconnect.error, "Reconectando", reconect);
-            reconect ? start() : exec("rm -rf session", err => err ? console.error("Error eliminando sesión:", err) : start())
-        } else if (connection === "open") console.log("Conexión establecida")
+		} else if (connection === "open") console.log("Conexión establecida")
     })
 
     sock.ev.on("group-participants.update", async ({ id, author, participants, action }) => {
