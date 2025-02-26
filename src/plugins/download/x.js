@@ -7,7 +7,7 @@ export default {
     comand: ['x', 'twitter'],
     exec: async (m, { sock }) => {
         await Twitter.download(m.text).then((data) => {
-            m.reply(JSON.stringify(data, null, 2))
+            m.reply(JSON.parse(data))
         }).catch(err => m.reply(err.message))
     }
 }
