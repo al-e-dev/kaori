@@ -19,7 +19,20 @@ const start = async () => {
         logger: pino({ level: "silent" }),
         auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "silent" })) },
         browser: Browsers.iOS("Safari"),
-        printQRInTerminal: false
+        printQRInTerminal: false,
+        emitOwnEvents: true,
+		generateHighQualityLinkPreview : true,
+		markOnlineOnConnect: false,
+		linkPreviewImageThumbnailWidth : 192,
+		receivedPendingNotifications: false,
+        getMessage: async (msg) => {
+            if (store) {
+                const m = await store.loadMessage(msg.remoteJid, msg.id);
+                return m?.message || undefined
+            }
+        },
+        keepAliveIntervalMs: 30_000,
+        syncFullHistory: false,
     })
 
     store.bind(sock.ev);
@@ -27,6 +40,43 @@ const start = async () => {
     if (!sock.authState.creds.registered) {
         console.log(`Emparejamiento con este código: ${await sock.requestPairingCode(await question("Ingresa tu número de WhatsApp activo: "))}`)
     }
+
+    client.ev.on("connection.update", async({ connection, lastDisconnect}) => {
+        const date = new Date()
+        const Time = `${date.getHours()}:${date.getMinutes()}`
+		if (connection == "close") {
+			let reason = new Boom(lastDisconnect?.error)?.output?.statuscode
+			if (reason == DisconnectReason.badSession) {
+                console.log(chalk.bgRed(`[ ${Time} ] Se daño la carpeta ${global.name_sessions}, borre la carpeta y escanee el QR nuevamente.`));
+                process.exit()
+            } else if (reason == DisconnectReason.connectionClosed) {
+                console.log(chalk.bgRed(`[ ${Time} ] Se cerro la conexion conectando de nuevo`))
+                start()
+            } else if (reason == DisconnectReason.connectionLost) {
+                console.log(chalk.bgRed(`[ ${Time} ] Se perdio la conexion con el servidor reconectando...`))
+                start()
+            } else if (reason == DisconnectReason.connectionReplaced) {
+                console.log(chalk.bgRed(`[ ${Time} ] Se creo una nueva sesion y reemplazo la actual, revise y escanee nuevamente el QR`))
+                process.exit()
+            } else if (reason == DisconnectReason.loggedOut) { console.log(chalk.bgRed(`[ ${Time} ] El dispositivo se desvinculo, borre la carpeta ${info.name_sessions} y escanee el codigo QR nuevamente.`))
+                process.exit()
+            } else if (reason == DisconnectReason.restartRequired) {
+                console.log(chalk.bgRed(`[ ${Time} ] Es necesario reiniciar, se reiniciara automaticamente aguarde...`))
+                start()
+            } else if (reason == DisconnectReason.timedOut) {
+                console.log(chalk.bgRed(`[ ${Time} ] Se agoto el tiempo de espera, reconectando...`))
+                start()
+            }
+			else { 
+				console.log(chalk.bgRed(`[ ${Time} ] Error de desconexion desconocido: ${reason}||${connection}`))
+			}
+		} if (connection == "open") {
+			mongoose.connect(`mongodb+srv://alexito:alexito1638@serverdatadb.39fv13g.mongodb.net/aiwbot?retryWrites=true&w=majority&appName=ServerDataDB`)
+				.then(() => { console.log('Base de datos conectada') })
+				.catch((e) => { console.error('Error al conectar con la base de datos: ', e) })
+			console.log(`Sistema en linea.`);
+		};
+	})
 
     sock.ev.on("connection.update", ({ connection, lastDisconnect }) => {
         if (connection === "close") {
