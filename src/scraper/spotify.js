@@ -65,7 +65,7 @@ export default new class Spotify {
 
     async downloadV2(url) {
         try {
-            const response = await this.client.post('https://spotmate.online/convert', { urls: url }, {
+            const { data } = await this.client.post('https://spotmate.online/convert', { urls: url }, {
                 headers: {
                     'Accept': '*/*',
                     'Accept-Encoding': 'gzip, deflate, br, zstd',
@@ -84,7 +84,7 @@ export default new class Spotify {
                     'X-Csrf-Token': 'o9YRJIwiXYfhKYx0i9zfsFt5ifOERXUcg5wFyq37'
                 }
             });
-            return response.data.url
+            return data.url
         } catch (error) {
             console.error('Error:', error);
         }

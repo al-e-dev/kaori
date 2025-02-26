@@ -30,96 +30,6 @@ export default new class Download {
             if (['/watch', 'channel', 'user'].some(p => p === pathname || section === p)) return null
             return section === 'playlist' ? searchParams.get('list') : input
         })()
-
-    }
-
-    async cookies() {
-        const url = 'https://raw.githubusercontent.com/Nazi-Team/cookies/master/cookies.json';
-        try {
-            const { data } = await axios.get(url, {
-                timeout: 10000,
-                headers: {
-                    'Cache-Control': 'no-cache',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
-                }
-            });
-    
-            const cookies = data
-                .map(c => {
-                    try {
-                        // Normalizar y validar propiedades de la cookie
-                        const domain = (c.domain || 'www.youtube.com').replace(/^\./, '');
-                        const expires = c.expires ? new Date(c.expires) : new Date(Date.now() + 86400000); // 1 día por defecto
-                        
-                        const cookie = new Cookie({
-                            key: c.name,
-                            value: c.value,
-                            domain: domain,
-                            path: c.path || '/',
-                            secure: c.secure !== undefined ? c.secure : true,
-                            httpOnly: c.httpOnly !== undefined ? c.httpOnly : true,
-                            sameSite: c.sameSite || 'lax',
-                            expires: expires,
-                            hostOnly: domain.startsWith('.') ? false : true,
-                            creation: new Date(),
-                            lastAccessed: new Date()
-                        });
-    
-                        // Validar la cookie
-                        if (!cookie.validate()) {
-                            console.error(`Cookie inválida: ${c.name}`);
-                            return null;
-                        }
-                        
-                        return cookie;
-                    } catch (e) {
-                        console.error(`Error procesando cookie ${c.name}: ${e.message}`);
-                        return null;
-                    }
-                })
-                .filter(c => c !== null);
-    
-            let loaded = 0;
-            const uniqueDomains = new Set();
-    
-            for (const cookie of cookies) {
-                try {
-                    const domain = cookie.domain.startsWith('.') 
-                        ? cookie.domain.slice(1) 
-                        : cookie.domain;
-                    
-                    const cookieUrl = `https://${domain}${cookie.path}`;
-                    this.jar.setCookieSync(cookie, cookieUrl, {
-                        ignoreError: false,
-                        http: cookie.httpOnly,
-                        secure: cookie.secure,
-                        sameSiteContext: cookie.sameSite
-                    });
-                    
-                    loaded++;
-                    uniqueDomains.add(domain);
-                    console.log(`🍪 Cookie cargada: ${cookie.key} para ${domain}`);
-                } catch (e) {
-                    console.error(`Error cargando cookie ${cookie.key}: ${e.message}`);
-                }
-            }
-    
-            console.log(`✅ Cookies cargadas: ${loaded}/${cookies.length}`);
-            console.log(`🌐 Dominios cubiertos: ${Array.from(uniqueDomains).join(', ')}`);
-    
-            // Verificación adicional de cookies
-            const testUrl = 'https://www.youtube.com';
-            const testCookies = this.jar.getCookiesSync(testUrl);
-            console.log(`🔍 Cookies disponibles para YouTube: ${testCookies.map(c => c.key).join(', ')}`);
-    
-        } catch (error) {
-            console.error(`❌ Error en sistema de cookies: ${error.message}`);
-            if (error.response) {
-                console.error(`🚩 Estado HTTP: ${error.response.status}`);
-                console.error(`🔗 URL solicitada: ${error.config.url}`);
-            }
-            throw new Error('Fallo en la carga de cookies. Sistema degradado.');
-        }
     }
 
     search(query) {
@@ -158,15 +68,16 @@ export default new class Download {
                             published: data.publishedTimeText?.simpleText
                         };
                     }
-                    return null;
-                }).filter(Boolean);
-                resolve(results);
-            }).catch(reject);
-        });
+                    return null
+                }).filter(Boolean)
+                resolve(results)
+            }).catch(reject)
+        })
     }
 
-    getInfo(id = "4xWETGFEXWs") {
+    getInfo(url) {
         return new Promise(async (resolve, reject) => {
+            const id = getYouTubeID(url)
             await this.client.get(`https://www.youtube.com/watch`, {
                 params: { v: id },
             }).then(async ({ data }) => {
