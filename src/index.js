@@ -1,8 +1,8 @@
 import "../src/config.js"
-import baileys, { DisconnectReason, makeInMemoryStore, useMultiFileAuthState, generateWAMessageFromContent, makeCacheableSignalKeyStore, delay, Browsers, fetchLatestBaileysVersion } from "@nazi-team/baileys"
+import { DisconnectReason, makeInMemoryStore, useMultiFileAuthState, generateWAMessageFromContent, makeCacheableSignalKeyStore, delay, Browsers, fetchLatestBaileysVersion } from "@nazi-team/baileys"
+import { Boom } from '@hapi/boom'
 import pino from "pino"
 import readline from "readline"
-import { exec } from "child_process"
 import { _prototype } from "../lib/_whatsapp.js"
 import { _content } from "../lib/_content.js"
 import { Lang } from "../lib/_language.js"
