@@ -1,14 +1,27 @@
-import { format } from "util"
 import Twitter from "../../scraper/x.js"
 
 export default {
-    name: 'x',
+    name: 'twitter',
     params: ['url'],
-    description: 'Busca y descarga audio de x',
-    comand: ['x', 'twitter'],
+    description: 'Descarga y envía imágenes o videos de Twitter',
+    comand: ['twitter', 'tw', 'x'],
     exec: async (m, { sock }) => {
-        await Twitter.download(m.text).then((data) => {
-            m.reply(format(data))
-        }).catch(err => m.reply(err.message))
+        const { includes: { media } } = await Twitter.download(m.text)
+        const messages = media.map(item => {
+            if (item.type === 'photo') {
+                return { type: 'image', data: { url: item.media_url_https } }
+            }
+            if (item.type === 'video') {
+                const variants = item.variants.filter(v => v.content_type === 'video/mp4')
+                const best = variants.sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0))[0]
+                return { type: 'video', data: { url: best ? best.url : item.media_url_https } }
+            }
+            return null
+        }).filter(Boolean)
+        if (messages.length === 1) {
+            await sock.sendMessage(m.from, { [messages[0].type]: { url: messages[0].data.url } })
+        } else if (messages.length > 1) {
+            await sock.sendAlbumMessage(m.from, messages, { delay: 3000 })
+        }
     }
 }
