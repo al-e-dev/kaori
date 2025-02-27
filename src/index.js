@@ -70,7 +70,10 @@ const start = async () => {
 			else { 
 				console.log(chalk.bgRed(`[ ${Time} ] Error de desconexion desconocido: ${reason}||${connection}`))
 			}
-		} else if (connection === "open") console.log("Conexión establecida")
+		} else if (connection === "open") {
+            console.log("Conexión establecida")
+            rl.close()
+        }
     })
 
     sock.ev.on("group-participants.update", async ({ id, author, participants, action }) => {
