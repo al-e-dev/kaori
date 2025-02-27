@@ -7,14 +7,16 @@ export default {
     comand: ['playmp3', 'ytaudio', 'ytmp3'],
     exec: async (m, { sock }) => {
         let result
-        if (new URL(m.text).href) {
+
+        let url = new URL(m.text).href
+        if (url) {
             result = await Youtube.getInfo(m.text)
         } else {
             const search = await Youtube.search(m.text)
             result = search[0]
         }
 
-        const download = await Youtube.convert(result.url)
+        const download = await Youtube.convert(result.url, 320)
 
         await sock.sendMessage(m.from, {
             audio: { url: download.url },

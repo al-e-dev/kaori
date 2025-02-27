@@ -7,14 +7,16 @@ export default {
     comand: ['playmp4', 'ytvideo', 'ytmp4'],
     exec: async (m, { sock }) => {
         let result
-        if (new URL(m.text).href) {
+
+        let url = new URL(m.text).href
+        if (url) {
             result = await Youtube.getInfo(m.text)
         } else {
             const search = await Youtube.search(m.text)
             result = search[0]
         }
 
-        const download = await Youtube.convert(result.url)
+        const download = await Youtube.convert(result.url, 360)
 
         await sock.sendMessage(m.from, {
             video: { url: download.url },
