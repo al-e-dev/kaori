@@ -2,7 +2,7 @@ import Youtube from "../../scraper/youtube.js"
 
 export default {
     name: 'ytmp4',
-    params: ['message'],
+    params: ['url'],
     description: 'Busca y descarga videos de YouTube',
     comand: ['playmp4', 'ytvideo', 'ytmp4'],
     exec: async (m, { sock }) => {
