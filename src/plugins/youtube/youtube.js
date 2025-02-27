@@ -15,11 +15,47 @@ export default {
             footer: _config.bot.name,
             image: { url: video.thumbnail },
             buttons: [
-                { buttonId: '.ytmp3 ' + video.url, buttonText: { displayText: 'Audio' } },
-                { buttonId: '.ytmp4 ' + video.url, buttonText: { displayText: 'Video' } }
+                { buttonId: 'audio', buttonText: { displayText: 'Audio' } },
+                { buttonId: 'video', buttonText: { displayText: 'Video' } }
             ],
             headerType: 6,
             viewOnce: true
         })
+
+        const filter = response => response.key.remoteJid === m.from && response.key.participant === m.sender;
+        const timeout = setTimeout(() => {
+            sock.ev.off('messages.upsert', responseHandler);
+        }, 5 * 60 * 1000);
+
+        const responseHandler = async response => {
+            if (response.messages[0].message && response.messages[0].message.buttonsResponseMessage && filter(response.messages[0])) {
+                clearTimeout(timeout);
+                sock.ev.off('messages.upsert', responseHandler);
+
+                const type = response.messages[0].message.buttonsResponseMessage.selectedButtonId === 'audio' ? 'audio' : 'video';
+
+                if (type === 'audio') {
+                    const audioBuffer = await ytmp3(video.url)
+                    await sock.sendMessage(m.from, {
+                        audio: audioBuffer,
+                        mimetype: 'audio/mpeg',
+                        ptt: false,
+                        contextInfo: {
+                            externalAdReply: {
+                                mediaType: 1,
+                                renderLargerThumbnail: false,
+                                sourceUrl: video.url,
+                                thumbnailUrl: video.thumbnail,
+                                body: video.title
+                            }
+                        }
+                    })
+                } else if (type === 'video') {
+                    await sock.sendMedia(m.from, await ytmp4(video.url), { caption: video.title });
+                }
+            }
+        };
+
+        sock.ev.on('messages.upsert', responseHandler)
     }
 }

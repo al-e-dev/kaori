@@ -8,16 +8,15 @@ export default {
     exec: async (m, { sock }) => {
         let result
 
-        let url = new URL(m.text).href
-        if (url) {
+        if (/^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]+/.test(m.text)) {
             result = await Youtube.getInfo(m.text)
         } else {
             const search = await Youtube.search(m.text)
+            if (!search.length) throw new Error("No results found")
             result = search[0]
         }
-        console.log(result)
+
         const download = await Youtube.convert(result.url, 360)
-        console.log(download)
 
         await sock.sendMessage(m.from, {
             video: { url: download.url },

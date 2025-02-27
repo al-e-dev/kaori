@@ -69,7 +69,9 @@ export default new class Download {
                     return null
                 }).filter(Boolean)
                 resolve(results)
-            }).catch(reject)
+            }).catch(() => {
+                throw new reject({ status: false, message: "Converting error" })
+            })
         })
     }
 
@@ -100,7 +102,9 @@ export default new class Download {
                     }
                 }
                 resolve(result);
-            }).catch(() => resolve({ status: false, message: "Converting error" }))
+            }).catch(() => {
+                throw new reject({ status: false, message: "Converting error" })
+            })
         })
     }
 
@@ -112,27 +116,29 @@ export default new class Download {
                     if (y.status === "Error") reject({ status: false, message: "Progress error" })
                     if (y.status === "Finished") resolve({
                         status: true,
-                        quality: `${quality}${this.audio.includes(quality) ? "kbps" : "p"}`,
-                        availableQuality: this.audio.includes(quality) ? this.audio : this.video,
+                        quality,
                         url: y.url,
                         filename: `${x.title} (${quality}${this.audio.includes(quality) ? "kbps).mp3" : "p).mp4"}`
                     })
-                }).catch(() => reject({ status: false, message: "Converting error" }))
-            }).catch(() => reject({ status: false, message: "Converting error" }))
+                }).catch(() => {
+                    throw new reject({ status: false, message: "Converting error" })
+                })
+            }).catch(() => {
+                throw new reject({ status: false, message: "Converting error" })
+            })
         })
     }
 
-    ytmp3(url, formats) {
+    ytmp3(url) {
         return new Promise(async (resolve, reject) => {
             const id = this.getYouTubeID(url)
-            const format = this.audio.includes(Number(formats)) ? Number(formats) : 128
 
             const data = await this.getInfo(id)
-            const mp3 = await this.convert(id, format)
+            await this.convert(id, 320).then(async ({ url, filename, quality }) => {
+                const result = await fetch(url)
+                const buffer = Buffer.from(await result.arrayBuffer())
 
-            resolve({
-                status: true,
-                data: {
+                resolve({
                     url: data.url,
                     title: data.title,
                     description: data.description,
@@ -147,10 +153,16 @@ export default new class Download {
                         thumbnail: data.author.thumbnail,
                         url: data.author.url
                     },
-                    download: mp3.url,
-                }
-            });
-
+                    metadata: {
+                        download: buffer,
+                        duration: buffer.length,
+                        filename: filename,
+                        quality: quality
+                    }
+                })
+            }).catch(() => {
+                throw new reject({ status: false, message: "Converting error" })
+            })
         })
     }
 
@@ -160,32 +172,35 @@ export default new class Download {
             const format = this.video.includes(Number(formats)) ? Number(formats) : 360
 
             const data = await this.getInfo(id)
-            await this.convert(id, format).then((result) => {
-                const buffer = fetch(result.url)
-                if (!buffer.ok) reject({ status: false, message: "Error no se pudo obtener el video" })
-                
-                const download = buffer.buffer()
+            await this.convert(id, format).then(async ({ url, filename, quality }) => {
+                const result = await fetch(url)
+                const buffer = Buffer.from(await result.arrayBuffer())
                 resolve({
-                    status: true,
-                    data: {
-                        url: data.url,
-                        title: data.title,
-                        description: data.description,
-                        date: data.date,
-                        views: data.views,
-                        likes: data.likes,
-                        thumbnail: data.thumbnail,
-                        author: {
-                            name: data.author.name,
-                            username: data.author.username,
-                            subscribers: data.author.subscribers,
-                            thumbnail: data.author.thumbnail,
-                            url: data.author.url
-                        },
-                        download
+                    url: data.url,
+                    title: data.title,
+                    description: data.description,
+                    date: data.date,
+                    views: data.views,
+                    likes: data.likes,
+                    thumbnail: data.thumbnail,
+                    author: {
+                        name: data.author.name,
+                        username: data.author.username,
+                        subscribers: data.author.subscribers,
+                        thumbnail: data.author.thumbnail,
+                        url: data.author.url
+                    },
+                    metadata: {
+                        download: buffer,
+                        duration: buffer.length,
+                        filename,
+                        quality
                     }
+
                 })
-            }).catch(() => reject({ status: false, message: "Converting error" }))
+            }).catch(() => {
+                throw new reject({ status: false, message: "Converting error" })
+            })
         })
     }
 }
