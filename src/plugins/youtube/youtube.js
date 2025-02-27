@@ -35,17 +35,17 @@ export default {
                 const type = response.messages[0].message.buttonsResponseMessage.selectedButtonId === 'audio' ? 'audio' : 'video'
 
                 if (type === 'audio') {
-                    const audio = await YouTube.ytmp3(video.url)
+                    const result = await YouTube.ytmp3(video.url)
                     await sock.sendMessage(m.from, {
-                        audio: audio.metadata.download,
+                        audio: result.metadata.download,
                         mimetype: 'audio/mpeg',
                         ptt: true
                     })
                 } else if (type === 'video') {
-                    const video = await YouTube.ytmp3(video.url)
+                    const result = await YouTube.ytmp3(video.url)
                     await sock.sendMessage(m.from, {
-                        video: video.metadata.download,
-                        caption: video.author.name,
+                        video: result.metadata.download,
+                        caption: result.author.name,
                     })
                 }
             }

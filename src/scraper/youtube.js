@@ -119,8 +119,7 @@ export default new class Download {
                         status: true,
                         quality,
                         url: y.url,
-                        filename: `${x.title} (${quality}${this.audio.includes(quality) ? "kbps).mp3" : "p).mp4"
-                            }`
+                        filename: `${x.title} (${quality}${this.audio.includes(quality) ? "kbps).mp3" : "p).mp4"}`
                     })
                 }).catch(() => {
                     throw new Error("Error converting YouTube video at the specified quality (progress check failed)")
