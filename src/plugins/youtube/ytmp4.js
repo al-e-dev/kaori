@@ -15,8 +15,9 @@ export default {
             const search = await Youtube.search(m.text)
             result = search[0]
         }
-
+        console.log(result)
         const download = await Youtube.convert(result.url, 360)
+        console.log(download)
 
         await sock.sendMessage(m.from, {
             video: { url: download.url },
