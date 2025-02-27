@@ -12,7 +12,7 @@ import Yt from "../../scraper/youtube.js"
 
 import baileys, {
     generateWAMessageFromContent
-} from '@al-e-dev/baileys'
+} from '@nazi-team/baileys'
 
 const { proto } = baileys
 
