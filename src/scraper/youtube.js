@@ -70,7 +70,7 @@ export default new class Download {
                 }).filter(Boolean)
                 resolve(results)
             }).catch(() => {
-                throw new Error("Error converting search results from YouTube")
+                throw new Error("Error search results from YouTube")
             })
         })
     }
@@ -114,7 +114,7 @@ export default new class Download {
                 }
                 resolve(result)
             }).catch(() => {
-                throw new Error("Error converting video information from YouTube")
+                throw new Error("Error get video information from YouTube")
             })
         })
     }
@@ -142,69 +142,74 @@ export default new class Download {
 
     ytmp3(url) {
         return new Promise(async resolve => {
-            const data = await this.getInfo(url)
-            await this.convert(url, 320).then(async ({ url, filename, quality }) => {
-                const result = await fetch(url)
-                const buffer = Buffer.from(await result.arrayBuffer())
-                resolve({
-                    url: data.url,
-                    title: data.title,
-                    description: data.description,
-                    date: data.date,
-                    views: data.views,
-                    likes: data.likes,
-                    thumbnail: data.thumbnail,
-                    author: {
-                        name: data.author.name,
-                        username: data.author.username,
-                        subscribers: data.author.subscribers,
-                        thumbnail: data.author.thumbnail,
-                        url: data.author.url
-                    },
-                    metadata: {
-                        download: buffer,
-                        duration: buffer.length,
-                        filename: `${data.title} (${quality}${this.audio.includes(quality) ? "kbps).mp3" : "p).mp4"
-                            }`,
-                        quality
-                    }
+            await this.getInfo(url).then(async (data) => {
+                await this.convert(url, 320).then(async ({ url, filename, quality }) => {
+                    const result = await fetch(url)
+                    const buffer = Buffer.from(await result.arrayBuffer())
+                    resolve({
+                        url: data.url,
+                        title: data.title,
+                        description: data.description,
+                        date: data.date,
+                        views: data.views,
+                        likes: data.likes,
+                        thumbnail: data.thumbnail,
+                        author: {
+                            name: data.author.name,
+                            username: data.author.username,
+                            subscribers: data.author.subscribers,
+                            thumbnail: data.author.thumbnail,
+                            url: data.author.url
+                        },
+                        metadata: {
+                            download: buffer,
+                            duration: buffer.length,
+                            filename,
+                            quality
+                        }
+                    })
+                }).catch(() => {
+                    throw new Error("Error download YouTube video to MP3 format")
                 })
             }).catch(() => {
-                throw new Error("Error converting YouTube video to MP3 format")
+                throw new Error("Error get video information from YouTube")
             })
         })
     }
 
     ytmp4(url, formats = 360) {
         return new Promise(async resolve => {
-            const data = await this.getInfo(url)
-            await this.convert(url, 360).then(async ({ url, filename, quality }) => {
-                const result = await fetch(url)
-                const buffer = Buffer.from(await result.arrayBuffer())
-                resolve({
-                    url: data.url,
-                    title: data.title,
-                    description: data.description,
-                    date: data.date,
-                    views: data.views,
-                    likes: data.likes,
-                    thumbnail: data.thumbnail,
-                    author: {
-                        name: data.author.name,
-                        username: data.author.username,
-                        subscribers: data.author.subscribers,
-                        thumbnail: data.author.thumbnail,
-                        url: data.author.url
-                    },
-                    metadata: {
-                        download: buffer,
-                        duration: buffer.length,
-                        filename,
-                        quality
-                    }
+            const data = await this.getInfo(url).then(async () => {
+                await this.convert(url, 360).then(async ({ url, filename, quality }) => {
+                    const result = await fetch(url)
+                    const buffer = Buffer.from(await result.arrayBuffer())
+                    resolve({
+                        url: data.url,
+                        title: data.title,
+                        description: data.description,
+                        date: data.date,
+                        views: data.views,
+                        likes: data.likes,
+                        thumbnail: data.thumbnail,
+                        author: {
+                            name: data.author.name,
+                            username: data.author.username,
+                            subscribers: data.author.subscribers,
+                            thumbnail: data.author.thumbnail,
+                            url: data.author.url
+                        },
+                        metadata: {
+                            download: buffer,
+                            duration: buffer.length,
+                            filename,
+                            quality
+                        }
+                    })
+                }).catch(() => {
+                    throw new Error("Error download YouTube video to MP4 format")
                 })
             }).catch(() => {
-                throw new Error("Error converting YouTube video to MP4 format")
+                throw new Error("Error get video information from YouTube")
             })
         })
     }
