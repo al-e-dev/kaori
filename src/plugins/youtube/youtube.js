@@ -29,32 +29,27 @@ export default {
 
         const responseHandler = async response => {
             if (response.messages[0].message && response.messages[0].message.buttonsResponseMessage && filter(response.messages[0])) {
-                clearTimeout(timeout);
-                sock.ev.off('messages.upsert', responseHandler);
+                clearTimeout(timeout)
+                sock.ev.off('messages.upsert', responseHandler)
 
-                const type = response.messages[0].message.buttonsResponseMessage.selectedButtonId === 'audio' ? 'audio' : 'video';
+                const type = response.messages[0].message.buttonsResponseMessage.selectedButtonId === 'audio' ? 'audio' : 'video'
 
                 if (type === 'audio') {
-                    const audioBuffer = await ytmp3(video.url)
+                    const audio = await ytmp3(video.url)
                     await sock.sendMessage(m.from, {
-                        audio: audioBuffer,
+                        audio: audio.metadata.download,
                         mimetype: 'audio/mpeg',
-                        ptt: false,
-                        contextInfo: {
-                            externalAdReply: {
-                                mediaType: 1,
-                                renderLargerThumbnail: false,
-                                sourceUrl: video.url,
-                                thumbnailUrl: video.thumbnail,
-                                body: video.title
-                            }
-                        }
+                        ptt: true
                     })
                 } else if (type === 'video') {
-                    await sock.sendMedia(m.from, await ytmp4(video.url), { caption: video.title });
+                    const video = await ytmp3(video.url)
+                    await sock.sendMessage(m.from, {
+                        video: video.metadata.download,
+                        caption: video.author.name,
+                    })
                 }
             }
-        };
+        }
 
         sock.ev.on('messages.upsert', responseHandler)
     }
