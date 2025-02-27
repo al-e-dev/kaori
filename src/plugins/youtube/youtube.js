@@ -42,7 +42,7 @@ export default {
                         ptt: true
                     })
                 } else if (type === 'video') {
-                    const result = await YouTube.ytmp3(video.url)
+                    const result = await YouTube.ytmp4(video.url)
                     await sock.sendMessage(m.from, {
                         video: result.metadata.download,
                         caption: result.author.name,
