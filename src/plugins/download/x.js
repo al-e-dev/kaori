@@ -11,7 +11,7 @@ export default {
                 if (item.type === 'photo') {
                     return { type: 'image', data: { url: item.media_url_https } }
                 }
-                if (item.type === 'video') {
+                if (item.type === 'video' || item.type === 'animated_gif') {
                     const variants = item.variants.filter(v => v.content_type === 'video/mp4')
                     const best = variants.sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0))[0]
                     return { type: 'video', data: { url: best ? best.url : item.media_url_https } }
