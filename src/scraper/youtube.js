@@ -130,7 +130,7 @@ export default new class Download {
     }
 
     ytmp3(url) {
-        return new Promise(async resolve => {
+        return new Promise(async (resolve, reject) => {
             await this.getInfo(url).then(async (data) => {
                 await this.convert(url, 320).then(async ({ url, filename, quality }) => {
                     const result = await fetch(url)
@@ -167,7 +167,7 @@ export default new class Download {
     }
 
     ytmp4(url) {
-        return new Promise(async resolve => {
+        return new Promise(async (resolve, reject) => {
             const data = await this.getInfo(url).then(async () => {
                 await this.convert(url, 360).then(async ({ url, filename, quality }) => {
                     const result = await fetch(url)
