@@ -8,6 +8,7 @@ import { _prototype } from "../lib/_whatsapp.js"
 import { _content } from "../lib/_content.js"
 import { Lang } from "../lib/_language.js"
 import os from "os"
+import { format } from "util"
 
 const platform = os.platform()
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
@@ -161,7 +162,7 @@ const start = async () => {
                     }
                 }
 
-
+                console.log(format(m.message))
 
                 for (const plugin of global.plugins) {
                     if (!plugin.disable && plugin.comand ? (Array.isArray(plugin.comand) ? plugin.comand.includes(m.command) : plugin.comand.test(m.body)) : undefined) {
