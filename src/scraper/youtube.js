@@ -131,10 +131,8 @@ export default new class Download {
 
     ytmp3(url) {
         return new Promise(async (resolve, reject) => {
-            const id = this.getYouTubeID(url)
-
-            const data = await this.getInfo(id)
-            await this.convert(id, 320).then(async ({ url, filename, quality }) => {
+            const data = await this.getInfo(url)
+            await this.convert(url, 320).then(async ({ url, filename, quality }) => {
                 const result = await fetch(url)
                 const buffer = Buffer.from(await result.arrayBuffer())
 
@@ -168,11 +166,8 @@ export default new class Download {
 
     ytmp4(url, formats = 360) {
         return new Promise(async (resolve, reject) => {
-            const id = this.getYouTubeID(url)
-            const format = this.video.includes(Number(formats)) ? Number(formats) : 360
-
-            const data = await this.getInfo(id)
-            await this.convert(id, format).then(async ({ url, filename, quality }) => {
+            const data = await this.getInfo(url)
+            await this.convert(url, 360).then(async ({ url, filename, quality }) => {
                 const result = await fetch(url)
                 const buffer = Buffer.from(await result.arrayBuffer())
                 resolve({
