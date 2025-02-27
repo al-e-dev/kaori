@@ -104,8 +104,9 @@ export default new class Download {
         })
     }
 
-    convert(id, quality) {
+    convert(url, quality) {
         return new Promise(async (resolve, reject) => {
+            const id = this.getYouTubeID(url)
             await this.client.get(`https://ytdl.vreden.web.id/convert.php/${id}/${quality}`).then(async ({ data: x }) => {
                 await this.client.get(`https://ytdl.vreden.web.id/progress.php/${x.convert}`).then(async ({ data: y }) => {
                     if (y.status === "Error") reject({ status: false, message: "Progress error" })
@@ -121,7 +122,7 @@ export default new class Download {
         })
     }
 
-    ytmp3(url, formats = 320) {
+    ytmp3(url, formats) {
         return new Promise(async (resolve, reject) => {
             const id = this.getYouTubeID(url)
             const format = this.audio.includes(Number(formats)) ? Number(formats) : 128
