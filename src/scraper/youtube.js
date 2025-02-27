@@ -75,7 +75,7 @@ export default new class Download {
 
     getInfo(url) {
         return new Promise(async (resolve, reject) => {
-            const id = getYouTubeID(url)
+            const id = this.getYouTubeID(url)
             await this.client.get(`https://www.youtube.com/watch`, {
                 params: { v: id },
             }).then(async ({ data }) => {
@@ -123,7 +123,7 @@ export default new class Download {
 
     ytmp3(url, formats = 320) {
         return new Promise(async (resolve, reject) => {
-            const id = getYouTubeID(url)
+            const id = this.getYouTubeID(url)
             const format = this.audio.includes(Number(formats)) ? Number(formats) : 128
 
             const data = await this.getInfo(id)
@@ -155,7 +155,7 @@ export default new class Download {
 
     ytmp4(url, formats = 360) {
         return new Promise(async (resolve, reject) => {
-            const id = getYouTubeID(url)
+            const id = this.getYouTubeID(url)
             const format = this.video.includes(Number(formats)) ? Number(formats) : 360
 
             const data = await this.getInfo(id)
