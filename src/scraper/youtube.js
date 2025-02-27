@@ -31,7 +31,7 @@ export default new class Download {
     }
 
     search(query) {
-        return new Promise(async resolve => {
+        return new Promise(async (resolve, reject) => {
             await this.client.get("https://www.youtube.com/results", {
                 headers: {
                     accept: "*/*",
@@ -70,7 +70,7 @@ export default new class Download {
                 }).filter(Boolean)
                 resolve(results)
             }).catch(() => {
-                throw new Error("Error search results from YouTube")
+                reject({ status: false, message: "Error search results from YouTube" })
             })
         })
     }
@@ -103,17 +103,17 @@ export default new class Download {
                 }
                 resolve(result)
             }).catch(() => {
-                throw new Error("Error get video information from YouTube")
+                reject({ status: false, message: "Error get video information from YouTube" })
             })
         })
     }
 
     convert(url, quality) {
-        return new Promise(async resolve => {
+        return new Promise(async (resolve, reject) => {
             const id = this.getYouTubeID(url)
             await this.client.get(`https://ytdl.vreden.web.id/convert.php/${id}/${quality}`).then(async ({ data: x }) => {
                 await this.client.get(`https://ytdl.vreden.web.id/progress.php/${x.convert}`).then(async ({ data: y }) => {
-                    if (y.status === "Error") throw new Error("Conversion progress encountered an error")
+                    if (y.status === "Error") reject({ status: false, message: "Conversion progress encountered an error" })
                     if (y.status === "Finished") resolve({
                         status: true,
                         quality,
@@ -121,10 +121,10 @@ export default new class Download {
                         filename: `${x.title} (${quality}${this.audio.includes(quality) ? "kbps).mp3" : "p).mp4"}`
                     })
                 }).catch(() => {
-                    throw new Error("Error converting YouTube video at the specified quality (progress check failed)")
+                    reject({ status: false, message: "Error converting YouTube video at the specified quality (progress check failed)" })
                 })
             }).catch(() => {
-                throw new Error("Error converting YouTube video at the specified quality (initial conversion failed)")
+                reject({ status: false, message: "Error converting YouTube video at the specified quality (initial conversion failed)" })
             })
         })
     }
@@ -158,15 +158,15 @@ export default new class Download {
                         }
                     })
                 }).catch(() => {
-                    throw new Error("Error download YouTube video to MP3 format")
+                    reject({ status: false, message: "Error download YouTube video to MP3 format" })
                 })
             }).catch(() => {
-                throw new Error("Error get video information from YouTube")
+                reject({ status: false, message: "Error get video information from YouTube" })
             })
         })
     }
 
-    ytmp4(url, formats = 360) {
+    ytmp4(url) {
         return new Promise(async resolve => {
             const data = await this.getInfo(url).then(async () => {
                 await this.convert(url, 360).then(async ({ url, filename, quality }) => {
@@ -195,10 +195,10 @@ export default new class Download {
                         }
                     })
                 }).catch(() => {
-                    throw new Error("Error download YouTube video to MP4 format")
+                    reject({ status: false, message: "Error download YouTube video to MP4 format" })
                 })
             }).catch(() => {
-                throw new Error("Error get video information from YouTube")
+                reject({ status: false, message: "Error get video information from YouTube" })
             })
         })
     }
