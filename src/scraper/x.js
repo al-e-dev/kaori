@@ -89,7 +89,7 @@ export default new class Twitter {
                     referer: 'https://redketchup.io/'
                 }
             }).then(({ data }) => {
-                resolve(JSON.stringify(data, null, 2))
+                resolve(data.includes)
             }).catch(err => { reject(err) })
         })
     }
