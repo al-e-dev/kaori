@@ -15,8 +15,8 @@ export default {
             footer: _config.bot.name,
             image: { url: video.thumbnail },
             buttons: [
-                { buttonId: '.ytmp3' + video.url, buttonText: { displayText: 'Audio' } },
-                { buttonId: '.ytmp4' + video.url, buttonText: { displayText: 'Video' } }
+                { buttonId: '.ytmp3 ' + video.url, buttonText: { displayText: 'Audio' } },
+                { buttonId: '.ytmp4 ' + video.url, buttonText: { displayText: 'Video' } }
             ],
             headerType: 6,
             viewOnce: true
