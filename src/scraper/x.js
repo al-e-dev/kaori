@@ -73,7 +73,6 @@ export default new class Twitter {
             const id = (url.match(/status\/(\d+)/) || url.match(/(\d+)/))[1]
             const token = this.generateTokenId(id)
 
-
             Req.axios.get(`https://api.redketchup.io/tweetAttachments-v6?id=${encodeURIComponent(token)}`, {
                 headers: {
                     'accept': '*/*',

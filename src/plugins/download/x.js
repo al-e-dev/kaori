@@ -6,8 +6,8 @@ export default {
     description: 'Descarga y envía imágenes o videos de Twitter',
     comand: ['twitter', 'tw', 'x'],
     exec: async (m, { sock }) => {
-        Twitter.download(m.text).then(async ({ includes }) => {
-            const messages = includes.media.map(item => {
+        Twitter.download(m.text).then(async ({ media }) => {
+            const messages = media.map(item => {
                 if (item.type === 'photo') {
                     return { type: 'image', data: { url: item.media_url_https } }
                 }
