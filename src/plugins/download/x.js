@@ -7,6 +7,7 @@ export default {
     comand: ['twitter', 'tw', 'x'],
     exec: async (m, { sock }) => {
         await Twitter.download(m.text).then( async ({ includes: { media } }) => {
+            console.log(media)
             const messages = media.map(item => {
                 if (item.type === 'photo') {
                     return { type: 'image', data: { url: item.media_url_https } }
