@@ -18,6 +18,8 @@ export default {
                 }
                 return null
             }).filter(Boolean)
+
+            console.log(messages)
             if (messages.length === 1) {
                 await sock.sendMessage(m.from, { [messages[0].type]: { url: messages[0].data.url } })
             } else if (messages.length > 1) {
