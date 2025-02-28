@@ -160,13 +160,11 @@ const start = async () => {
                         db.data.chats[m.from].cache = db.data.chats[m.from].cache.filter(item => Date.now() - item.timestamp < 1200000)
                     }
                     if (db.data.chats[m.from]?.antitoxic) {
-                        toxicity.load(0.9).then(model => {
-                            model.classify(m.text).then(predictions => {
-                                console.log(predictions)
-                                m.reply("se detecto una palabra ofensiva")
-                            })
-                        })
+                        const predictions = await (await toxicity.load(0.9)).classify([m.text]);
+                        console.log(JSON.stringify(predictions));
+                        predictions.some(p => p.results.some(r => r.match)) && m.reply("Se detectó una palabra ofensiva");
                     }
+
                 }
 
                 // console.log(JSON.stringify(m.message, null, 2))
