@@ -159,28 +159,31 @@ const start = async () => {
                         db.data.chats[m.from].cache = db.data.chats[m.from].cache.filter(item => Date.now() - item.timestamp < 1200000)
                     }
                     if (db.data.chats[m.from]?.antitoxic) {
-                        const prompt = `Eres un analizador de lenguaje ofensivo. Tu tarea es determinar si el siguiente texto contiene palabras o frases ofensivas. Responde únicamente con "true" si detectas contenido ofensivo y "false" si no lo es. No agregues explicaciones ni ningún otro contenido.
-
-Texto: "${m.body}"`
-                        const { data } = await axios.post(
-                            "https://chateverywhere.app/api/chat/", {
-                                model: {
-                                    id: "gpt-4",
-                                    name: "GPT-4",
-                                    maxLength: 32000,
-                                    tokenLimit: 8000,
-                                    completionTokenLimit: 5000,
-                                    deploymentName: "gpt-4"
-                                },
-                                messages: [{ role: "user", content: prompt }],
-                                temperature: 0.5
-                            }, {
-                                headers: {
-                                    "Accept": "application/json",
-                                    "Content-Type": "application/json"
+                        const prompt = `Eres un analizador de lenguaje ofensivo. Tu tarea es determinar si el siguiente texto contiene palabras o frases ofensivas. Responde únicamente con "true" si detectas contenido ofensivo y "false" si no lo es. No agregues explicaciones ni ningún otro contenido.`
+                        let { data } = await axios.post("https://chateverywhere.app/api/chat/", {
+                            "model": {
+                                "id": "gpt-4",
+                                "name": "GPT-4",
+                                "maxLength": 32000,
+                                "tokenLimit": 8000,
+                                "completionTokenLimit": 5000,
+                                "deploymentName": "gpt-4"
+                            },
+                            "messages": [
+                                {
+                                    "pluginId": null,
+                                    "content": m.body,
+                                    "role": "user"
                                 }
+                            ],
+                            "prompt": prompt,
+                            "temperature": 0.5
+                        }, {
+                            headers: {
+                                "Accept": "/*/",
+                                "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
                             }
-                        )
+                        })
                         const status = JSON.parse(`{"text": ${data}}`).text
                         if (status) {
                             sock.sendMessage(m.from, { text: "El mensaje contiene contenido ofensivo" })
