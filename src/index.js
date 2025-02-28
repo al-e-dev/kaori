@@ -160,7 +160,7 @@ const start = async () => {
                     if (db.data.chats[m.from]?.antitoxic) {
                         const prompt = `Eres un analizador de lenguaje ofensivo. Tu tarea es determinar si el siguiente texto contiene palabras o frases ofensivas. Responde únicamente con "true" si detectas contenido ofensivo y "false" si no lo es. No agregues explicaciones ni ningún otro contenido.
 
-Texto: "${text}"`
+Texto: "${m.body}"`
                         const { data } = await axios.post(
                             "https://chateverywhere.app/api/chat/", {
                                 model: {
