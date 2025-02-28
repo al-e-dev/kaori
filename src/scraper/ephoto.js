@@ -1,6 +1,7 @@
 import axios from 'axios'
 import * as cheerio from 'cheerio'
 import FormData from 'form-data';
+import { format } from 'util';
 
 export default new class Ephoto {
     constructor() {
@@ -23,11 +24,11 @@ export default new class Ephoto {
             let serverId = $('#build_server_id').val()
             let token = $('#token').val()
             let submit = $('#submit').val()
-            let types = [];
+            let types = []
             $('input[name="radio0[radio]"]').each((i, elem) => {
-                types.push($(elem).attr("value"));
+                types.push($(elem).attr("value"))
             })
-            let post;
+            let post
             if (types.length != 0) {
                 post = {
                     'radio0[radio]': types[Math.floor(Math.random() * types.length)],
@@ -63,7 +64,7 @@ export default new class Ephoto {
             })
             $ = cheerio.load(b.data)
             let out = ($('#form_value').first().text() || $('#form_value_input').first().text() || $('#form_value').first().val() || $('#form_value_input').first().val())
-            let c = await axios.post((new URL(url)).origin + "/effect/create-image", out, {
+            let c = await axios.post((new URL(url)).origin + "/effect/create-image", format(out), {
                 headers: {
                     "Accept": "*/*",
                     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -78,5 +79,4 @@ export default new class Ephoto {
             throw e
         }
     }
-
 }
