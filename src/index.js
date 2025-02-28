@@ -163,7 +163,7 @@ const start = async () => {
                         toxicity.load(0.9)
                             .then(model => model.classify([m.text]))
                             .then(predictions => {
-                                console.log(JSON.stringify(predictions));
+                                console.log(JSON.stringify(predictions, null, 2));
                                 const detect = predictions.some(category =>
                                     category.results.some(result => result.match)
                                 )
