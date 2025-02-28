@@ -26,8 +26,9 @@ export default new class Ephoto {
             const serverId = $('#build_server_id').val()
             const token = $('#token').val()
             const submit = $('#submit').val() ? $('#submit').val() : $('#create_effect').val()
-        
-            const types = []
+
+            let post
+            let types = []
             $('input[name="radio0[radio]"]').each((i, elem) => {
                 types.push($(elem).attr("value"))
             })
