@@ -196,9 +196,9 @@ No incluyas ningún otro texto ni explicación.`
                     const resultado = typeof data === 'string' ? JSON.parse(data) : data
 
                     if (resultado.offensive.match) {
-                        m.reply("El mensaje contiene contenido ofensivo y/o obsceno");
+                        m.reply("El mensaje contiene contenido ofensivo");
                     } else if (resultado.obsenity.match) {
-                        m.reply("El mensaje no contiene contenido ofensivo ni obsceno");
+                        m.reply("El mensaje contiene contenid obsceno");
                     }
                 }
 
