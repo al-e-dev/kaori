@@ -32,7 +32,7 @@ export default new class Ephoto {
             $('input[name="radio0[radio]"]').each((i, elem) => {
                 types.push($(elem).attr("value"))
             })
-
+            let post
             if (types.length !== 0) {
                 post = {
                     'radio0[radio]': types[Math.floor(Math.random() * types.length)],
