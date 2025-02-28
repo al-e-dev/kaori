@@ -149,7 +149,7 @@ const start = async () => {
             if (type === 'notify' && messages[i].message) {
                 let m = await _content(sock, messages[i])
                 let v = m?.quoted ? m.quoted : m
-                let lang = db.data.users[m.sender] ? Lang[db.data.users[m.sender].language] : Lang[db.data.settings[sock.user.jid]?.language]
+                let lang = db.data.users[m?.sender] ? Lang[db.data.users[m?.sender].language] : Lang[db.data.settings[sock.user.jid]?.language]
                 let args = { sock, db, v, lang, delay }
 
                 if (!m.isMe && m.message && !m.id.startsWith("NZT") && !m.id.startsWith("BAE5")) {
@@ -158,47 +158,43 @@ const start = async () => {
                         db.data.chats[m.from].cache.push({ key: m.key, message: m.message, timestamp: Date.now() })
                         db.data.chats[m.from].cache = db.data.chats[m.from].cache.filter(item => Date.now() - item.timestamp < 1200000)
                     }
-                    const prompt = `Eres un analizador de lenguaje ofensivo y de contenido obsceno. Tu tarea es analizar el siguiente texto y determinar si contiene lenguaje ofensivo o que insinúe pornografía y/o gore. Responde únicamente con un objeto JSON con la siguiente estructura EXACTA:
-{
-  "offensive": { "detect": <porcentaje>, "match": <true|false> },
-  "obsenity": { "detect": <porcentaje>, "match": <true|false> }
-}
-Donde "detect" es un número del 0 al 100 que indica el nivel de contenido ofensivo/obsceno y "match" es true si se detecta contenido, false si no.
-Analiza el siguiente texto: "${m.body}"
-Considera también los siguientes términos dentro de obsenity: pene, pito, Pitó, cogerte, follar, follarte, panocha, vagina.
-No incluyas ningún otro texto ni explicación.`
 
-                    let { data } = await axios.post("https://chateverywhere.app/api/chat/", {
-                        "model": {
-                            "id": "gpt-4",
-                            "name": "GPT-4",
-                            "maxLength": 32000,
-                            "tokenLimit": 8000,
-                            "completionTokenLimit": 5000,
-                            "deploymentName": "gpt-4"
-                        },
-                        "messages": [
-                            {
-                                "pluginId": null,
-                                "content": m.body,
-                                "role": "user"
+                    if (db.data.chats[m.from]?.antitoxic) {
+                        let { data: prmpt } = await axios.get("https://raw.githubusercontent.com/al-e-dev/prompt/refs/heads/main/detect.js");
+                        
+                        let { data } = await axios.post("https://chateverywhere.app/api/chat/", {
+                            "model": {
+                                id: "gpt-4",
+                                name: "GPT-4",
+                                maxLength: 32000,
+                                tokenLimit: 8000,
+                                completionTokenLimit: 5000,
+                                deploymentName: "gpt-4"
+                            },
+                            messages: [{ pluginId: null, content: m.body, role: "user" }],
+                            prompt: prmpt,
+                            temperature: 0.5
+                        }, {
+                            headers: {
+                                "Accept": "application/json",
+                                "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
                             }
-                        ],
-                        "prompt": prompt,
-                        "temperature": 0.5
-                    }, {
-                        headers: {
-                            "Accept": "application/json",
-                            "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+                        })
+
+                        const resultado = typeof data === 'string' ? JSON.parse(data) : data
+
+                        if (resultado.offensive.match) {
+                            if (db.data.users[m.sender].warnings >= 3) {
+                                m.reply("El mensaje acumula 3 advertencias y será eliminado.")
+                                await sock.groupParticipantsUpdate(m.from, users, "remove")
+                            } else {
+                                m.reply("Se ha detectado un mensaje ofensivo.")
+                                db.data.users[m.sender].warnings += 1
+                            }
+                        } else if (resultado.obsenity.match) {
+                            m.reply("Se ha detectado un mensaje obsceno y será eliminado automáticamente.");
+                            await sock.groupParticipantsUpdate(m.from, users, "remove")
                         }
-                    })
-
-                    const resultado = typeof data === 'string' ? JSON.parse(data) : data
-
-                    if (resultado.offensive.match) {
-                        m.reply("El mensaje contiene contenido ofensivo");
-                    } else if (resultado.obsenity.match) {
-                        m.reply("El mensaje contiene contenid obsceno");
                     }
                 }
 
