@@ -9,6 +9,7 @@ import { _content } from "../lib/_content.js"
 import { Lang } from "../lib/_language.js"
 import os from "os"
 import { format } from "util"
+import * as toxicity from '@tensorflow-models/toxicity'
 
 const platform = os.platform()
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
@@ -23,10 +24,10 @@ const start = async () => {
         browser: Browsers.iOS("Safari"),
         printQRInTerminal: false,
         emitOwnEvents: true,
-		generateHighQualityLinkPreview : true,
-		markOnlineOnConnect: false,
-		linkPreviewImageThumbnailWidth : 192,
-		receivedPendingNotifications: false,
+        generateHighQualityLinkPreview: true,
+        markOnlineOnConnect: false,
+        linkPreviewImageThumbnailWidth: 192,
+        receivedPendingNotifications: false,
         getMessage: async (msg) => {
             if (store) {
                 const m = await store.loadMessage(msg.remoteJid, msg.id);
@@ -42,13 +43,13 @@ const start = async () => {
     if (!sock.authState.creds.registered) {
         console.log(`Emparejamiento con este código: ${await sock.requestPairingCode(await question("Ingresa tu número de WhatsApp activo: "), "KAORINET")}`)
     }
-    
+
     sock.ev.on("connection.update", ({ connection, lastDisconnect }) => {
         const date = new Date()
         const Time = `${date.getHours()}:${date.getMinutes()}`
-		if (connection == "close") {
-			let reason = new Boom(lastDisconnect?.error)?.output?.statuscode
-			if (reason == DisconnectReason.badSession) {
+        if (connection == "close") {
+            let reason = new Boom(lastDisconnect?.error)?.output?.statuscode
+            if (reason == DisconnectReason.badSession) {
                 console.log(chalk.bgRed(`[ ${Time} ] Se daño la carpeta auth, borre la carpeta y escanee el QR nuevamente.`));
                 process.exit()
             } else if (reason == DisconnectReason.connectionClosed) {
@@ -60,7 +61,8 @@ const start = async () => {
             } else if (reason == DisconnectReason.connectionReplaced) {
                 console.log(chalk.bgRed(`[ ${Time} ] Se creo una nueva sesion y reemplazo la actual, revise y escanee nuevamente el QR`))
                 process.exit()
-            } else if (reason == DisconnectReason.loggedOut) { console.log(chalk.bgRed(`[ ${Time} ] El dispositivo se desvinculo, borre la carpeta auth y escanee el codigo QR nuevamente.`))
+            } else if (reason == DisconnectReason.loggedOut) {
+                console.log(chalk.bgRed(`[ ${Time} ] El dispositivo se desvinculo, borre la carpeta auth y escanee el codigo QR nuevamente.`))
                 process.exit()
             } else if (reason == DisconnectReason.restartRequired) {
                 console.log(chalk.bgRed(`[ ${Time} ] Es necesario reiniciar, se reiniciara automaticamente aguarde...`))
@@ -69,10 +71,10 @@ const start = async () => {
                 console.log(chalk.bgRed(`[ ${Time} ] Se agoto el tiempo de espera, reconectando...`))
                 start()
             }
-			else { 
-				console.log(chalk.bgRed(`[ ${Time} ] Error de desconexion desconocido: ${reason}||${connection}`))
-			}
-		} else if (connection === "open") {
+            else {
+                console.log(chalk.bgRed(`[ ${Time} ] Error de desconexion desconocido: ${reason}||${connection}`))
+            }
+        } else if (connection === "open") {
             console.log("Conexión establecida")
             rl.close()
         }
@@ -80,9 +82,9 @@ const start = async () => {
 
     sock.ev.on("group-participants.update", async ({ id, author, participants, action }) => {
         if (!action || !db.data.chats[id]?.welcome || author?.endsWith("@lid")) return
-        
+
         const { subject, desc } = await sock.groupMetadata(id)
-    
+
         const messages = {
             add: p => author ? `Fuiste añadido por @${author.split`@`[0]}` : `Te uniste mediante enlace`,
             remove: p => author === p ? `Salió del grupo` : `Eliminado por @${author.split`@`[0]}`,
@@ -90,7 +92,7 @@ const start = async () => {
             demote: () => `Degradado por @${author.split`@`[0]}`,
             modify: () => `Configuración modificada`
         }
-    
+
         const images = {
             add: "./src/media/welcome.png",
             remove: "./src/media/goodbye.png",
@@ -98,17 +100,15 @@ const start = async () => {
             demote: "./src/media/demote.png",
             modify: "./src/media/modify.png"
         }
-    
+
         for (const p of participants) {
             const group = db.data.chats[id]
             const fake = p.split('@')[0]
-    
             if (group.antifake && action === 'add' && group.fake.some(i => fake.startsWith(i))) {
                 await sock.sendMessage(id, { text: 'Tu número se encuentra en la lista negra, serás eliminado automáticamente.' })
                 await sock.groupParticipantsUpdate(id, [p], 'remove')
                 continue
             }
-    
             const text = db.data.chats[id].messages[action]?.replace(/(@group|@action|@user|@time|@desc)/g, match => ({
                 '@group': `@${id}`,
                 '@action': messages[action]?.(p),
@@ -116,7 +116,6 @@ const start = async () => {
                 '@time': new Date().toLocaleString(),
                 '@desc': desc
             }[match])) || ''
-        
             await sock.sendMessage(id, {
                 image: { url: images[action] },
                 caption: text,
@@ -126,7 +125,7 @@ const start = async () => {
                 }
             })
         }
-    })    
+    })
 
     sock.ev.on("groups.update", async updates => {
         for (const { id, author, ...props } of updates) {
@@ -150,7 +149,7 @@ const start = async () => {
         for (let i = 0; i < messages.length; i++) {
             if (type === 'notify' && messages[i].message) {
                 let m = await _content(sock, messages[i])
-                let v = m.quoted ? m.quoted : m
+                let v = m?.quoted ? m.quoted : m
                 let lang = db.data.users[m.sender] ? Lang[db.data.users[m.sender].language] : Lang[db.data.settings[sock.user.jid]?.language]
                 let args = { sock, db, v, lang, delay }
 
@@ -159,6 +158,14 @@ const start = async () => {
                         db.data.chats[m.from].cache ||= []
                         db.data.chats[m.from].cache.push({ key: m.key, message: m.message, timestamp: Date.now() })
                         db.data.chats[m.from].cache = db.data.chats[m.from].cache.filter(item => Date.now() - item.timestamp < 1200000)
+                    }
+                    if (db.data.chats[m.from]?.antitoxic) {
+                        toxicity.load(0.9).then(model => {
+                            model.classify(m.text).then(predictions => {
+                                console.log(predictions)
+                                m.reply("se detecto una palabra ofensiva")
+                            })
+                        })
                     }
                 }
 
