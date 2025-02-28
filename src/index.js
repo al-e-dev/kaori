@@ -159,7 +159,7 @@ const start = async () => {
                         db.data.chats[m.from].cache = db.data.chats[m.from].cache.filter(item => Date.now() - item.timestamp < 1200000)
                     }
 
-                    if (db.data.chats[m.from]?.antitoxic) {
+                    /* (db.data.chats[m.from]?.antitoxic) {
                         let { data: prmpt } = await axios.get("https://raw.githubusercontent.com/al-e-dev/prompt/refs/heads/main/detect.js");
                         
                         let { data } = await axios.post("https://chateverywhere.app/api/chat/", {
@@ -195,7 +195,7 @@ const start = async () => {
                             m.reply("Se ha detectado un mensaje obsceno y será eliminado automáticamente.");
                             await sock.groupParticipantsUpdate(m.from, users, "remove")
                         }
-                    }
+                    } */
                 }
 
                 // console.log(JSON.stringify(m.message, null, 2))
