@@ -165,7 +165,7 @@ const start = async () => {
 }
 Donde "detect" es un número del 0 al 100 que indica el nivel de contenido ofensivo/obsceno y "match" es true si se detecta contenido, false si no.
 Analiza el siguiente texto: "${m.body}"
-Considera también los siguientes términos: pene, pito, Pitó, cogerte, follar, follarte, panocha, vagina.
+Considera también los siguientes términos dentro de obsenity: pene, pito, Pitó, cogerte, follar, follarte, panocha, vagina.
 No incluyas ningún otro texto ni explicación.`
 
                     let { data } = await axios.post("https://chateverywhere.app/api/chat/", {
