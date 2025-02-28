@@ -159,7 +159,12 @@ const start = async () => {
                         db.data.chats[m.from].cache = db.data.chats[m.from].cache.filter(item => Date.now() - item.timestamp < 1200000)
                     }
                     if (db.data.chats[m.from]?.antitoxic) {
-                        const prompt = `Eres un analizador de lenguaje ofensivo. Tu tarea es determinar si el siguiente texto contiene palabras o frases ofensivas. Responde únicamente con "true" si detectas contenido ofensivo y "false" si no lo es. No agregues explicaciones ni ningún otro contenido.`
+                        const prompt = `Eres un analizador de contenido especializado. Tu tarea es determinar si el siguiente texto contiene alguno de los siguientes tipos de contenido:
+- Lenguaje ofensivo (palabras o expresiones insultantes)
+- Contenido pornográfico
+- Contenido gore (descripciones de violencia extrema, sangre, perturbadoras)
+
+Responde únicamente con "true" si detectas alguno de estos contenidos, o "false" si el texto es aceptable. No agregues ninguna explicación, comentario o texto adicional.`
                         let { data } = await axios.post("https://chateverywhere.app/api/chat/", {
                             "model": {
                                 "id": "gpt-4",
@@ -186,7 +191,7 @@ const start = async () => {
                         })
                         const status = JSON.parse(`{"text": ${data}}`).text
                         if (status) {
-                            sock.sendMessage(m.from, { text: "El mensaje contiene contenido ofensivo" })
+                            m.reply("El mensaje contiene contenido ofensivo")
                         }
                     }
                 }
