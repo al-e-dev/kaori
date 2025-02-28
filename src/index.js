@@ -193,7 +193,8 @@ No incluyas ningún otro texto ni explicación.`
                         }
                     })
 
-                    const resultado = JSON.parse(data);
+                    console.log(data)
+                    const resultado = JSON.parse(data)
 
                     if (resultado.offensive.match) {
                         m.reply("El mensaje contiene contenido ofensivo y/o obsceno");
