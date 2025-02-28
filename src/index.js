@@ -8,8 +8,8 @@ import { _prototype } from "../lib/_whatsapp.js"
 import { _content } from "../lib/_content.js"
 import { Lang } from "../lib/_language.js"
 import os from "os"
-import { format } from "util"
-import * as toxicity from '@tensorflow-models/toxicity'
+import leoProfanity from 'leo-profanity';
+
 
 const platform = os.platform()
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
@@ -160,21 +160,11 @@ const start = async () => {
                         db.data.chats[m.from].cache = db.data.chats[m.from].cache.filter(item => Date.now() - item.timestamp < 1200000)
                     }
                     if (db.data.chats[m.from]?.antitoxic) {
-                        toxicity.load(0.9)
-                            .then(model => model.classify([m.text]))
-                            .then(predictions => {
-                                console.log(JSON.stringify(predictions, null, 2));
-                                const detect = predictions.some(category =>
-                                    category.results.some(result => result.match)
-                                )
-                                if (detect) {
-                                    m.reply("se detecto una palabra ofensiva")
-                                }
-                            })
-                            .catch(err => console.error(err))
+                        leoProfanity.loadDictionary('es')
+                        if (leoProfanity.check(m.text)) {
+                            m.reply("se detecto una palabra ofensiva");
+                        }
                     }
-
-
                 }
 
                 // console.log(JSON.stringify(m.message, null, 2))
