@@ -1,6 +1,7 @@
 import axios from 'axios'
 import * as cheerio from 'cheerio'
 import FormData from 'form-data';
+import cookie from 'cookie';
 
 export default new class Ephoto {
     constructor() {
