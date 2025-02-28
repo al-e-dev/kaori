@@ -158,41 +158,47 @@ const start = async () => {
                         db.data.chats[m.from].cache.push({ key: m.key, message: m.message, timestamp: Date.now() })
                         db.data.chats[m.from].cache = db.data.chats[m.from].cache.filter(item => Date.now() - item.timestamp < 1200000)
                     }
-                    if (db.data.chats[m.from]?.antitoxic) {
-                        const prompt = `Eres un analizador de contenido especializado. Tu tarea es determinar si el siguiente texto contiene alguno de los siguientes tipos de contenido:
-- Lenguaje ofensivo (palabras o expresiones insultantes)
-- Contenido pornográfico
-- Contenido gore (descripciones de violencia extrema, sangre, perturbadoras)
+                    const prompt = `Eres un analizador de lenguaje ofensivo y de contenido obsceno. Tu tarea es analizar el siguiente texto y determinar si contiene lenguaje ofensivo o que insinúe pornografía y/o gore. Responde únicamente con un objeto JSON con la siguiente estructura EXACTA:
+{
+  "offensive": { "detect": <porcentaje>, "match": <true|false> },
+  "obsenity": { "detect": <porcentaje>, "match": <true|false> }
+}
+Donde "detect" es un número del 0 al 100 que indica el nivel de contenido ofensivo/obsceno y "match" es true si se detecta contenido, false si no.
+Analiza el siguiente texto: "${m.body}"
+Considera también los siguientes términos: pene, pito, Pitó, cogerte, follar, follarte, panocha, vagina.
+No incluyas ningún otro texto ni explicación.`
 
-Responde únicamente con "true" si detectas alguno de estos contenidos, o "false" si el texto es aceptable. No agregues ninguna explicación, comentario o texto adicional.`
-                        let { data } = await axios.post("https://chateverywhere.app/api/chat/", {
-                            "model": {
-                                "id": "gpt-4",
-                                "name": "GPT-4",
-                                "maxLength": 32000,
-                                "tokenLimit": 8000,
-                                "completionTokenLimit": 5000,
-                                "deploymentName": "gpt-4"
-                            },
-                            "messages": [
-                                {
-                                    "pluginId": null,
-                                    "content": m.body,
-                                    "role": "user"
-                                }
-                            ],
-                            "prompt": prompt,
-                            "temperature": 0.5
-                        }, {
-                            headers: {
-                                "Accept": "/*/",
-                                "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+                    let { data } = await axios.post("https://chateverywhere.app/api/chat/", {
+                        "model": {
+                            "id": "gpt-4",
+                            "name": "GPT-4",
+                            "maxLength": 32000,
+                            "tokenLimit": 8000,
+                            "completionTokenLimit": 5000,
+                            "deploymentName": "gpt-4"
+                        },
+                        "messages": [
+                            {
+                                "pluginId": null,
+                                "content": m.body,
+                                "role": "user"
                             }
-                        })
-                        const status = JSON.parse(`{"text": ${data}}`).text
-                        if (status) {
-                            m.reply("El mensaje contiene contenido ofensivo")
+                        ],
+                        "prompt": prompt,
+                        "temperature": 0.5
+                    }, {
+                        headers: {
+                            "Accept": "application/json",
+                            "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
                         }
+                    })
+
+                    const resultado = JSON.parse(data);
+
+                    if (resultado.offensive.match) {
+                        m.reply("El mensaje contiene contenido ofensivo y/o obsceno");
+                    } else if (resultado.obsenity.match) {
+                        m.reply("El mensaje no contiene contenido ofensivo ni obsceno");
                     }
                 }
 
