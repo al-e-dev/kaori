@@ -4,6 +4,7 @@ import { Boom } from '@hapi/boom'
 import pino from "pino"
 import readline from "readline"
 import chalk from "chalk"
+import axios from "axios"
 import { _prototype } from "../lib/_whatsapp.js"
 import { _content } from "../lib/_content.js"
 import { Lang } from "../lib/_language.js"
