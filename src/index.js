@@ -161,7 +161,7 @@ const start = async () => {
                     }
 
                     if (db.data.chats[m.from]?.antilink.status && m.isGroup && m.isBotAdmin && !m.isAdmin) {
-                        const links = detect(m.body)
+                        const links = Func.detect(m.body)
                         if (links.some(u => {
                             try {
                                 const h = new URL(u).hostname.toLowerCase()
