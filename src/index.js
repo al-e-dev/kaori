@@ -8,6 +8,7 @@ import axios from "axios"
 import { _prototype } from "../lib/_whatsapp.js"
 import { _content } from "../lib/_content.js"
 import { Lang } from "../lib/_language.js"
+import Func from "../lib/_functions.js"
 import os from "os"
 
 const platform = os.platform()
@@ -150,7 +151,7 @@ const start = async () => {
                 let m = await _content(sock, messages[i])
                 let v = m?.quoted ? m.quoted : m
                 let lang = db.data.users[m?.sender] ? Lang[db.data.users[m?.sender].language] : Lang[db.data.settings[sock.user.jid]?.language]
-                let args = { sock, db, v, lang, delay }
+                let args = { sock, db, v, lang, delay, Func }
 
                 if (!m.isMe && m.message && !m.id.startsWith("NZT") && !m.id.startsWith("BAE5")) {
                     if (db.data.chats[m.from]?.antidelete) {
@@ -159,12 +160,27 @@ const start = async () => {
                         db.data.chats[m.from].cache = db.data.chats[m.from].cache.filter(item => Date.now() - item.timestamp < 1200000)
                     }
 
+                    if (db.data.chats[m.from].antilink.status && m.isGroup && m.isBotAdmin && !m.isAdmin) {
+                        const links = detect(m.body)
+                        if (links.some(u => {
+                            try {
+                                const h = new URL(u).hostname.toLowerCase()
+                                return Object.values(db.data.chats[m.from].antilink.links).some(({ allowed, domains }) => !allowed && domains.some(d => h.endsWith(d)))
+                            } catch { return false }
+                        })) {
+                            await sock.groupParticipantsUpdate(m.from, [m.sender], "remove")
+                            await sock.sendMessage(m.from, { delete: { remoteJid: m.from, fromMe: false, id: m.id, participant: m.sender } })
+                            await m.reply(`Enlace detectado y eliminado. @${m.sender.split('@')[0]} fue eliminado del grupo.`)
+                            continue
+                        }
+                    }
+
                     if (db.data.chats[m.from]?.antitoxic) {
                         let { data: prmpt } = await axios.get("https://raw.githubusercontent.com/al-e-dev/prompt/refs/heads/main/detect.js");
-                        
+
                         let { data } = await axios.post("https://chateverywhere.app/api/chat/", {
                             model: { id: "gpt-4", name: "GPT-4", maxLength: 32000, tokenLimit: 8000, completionTokenLimit: 5000, deploymentName: "gpt-4" },
-                            messages: [{ pluginId: null, content: m.body, role: "user" }],
+                            messages: [{ pluginId: null, content: m.text, role: "user" }],
                             prompt: prmpt,
                             temperature: 0.5
                         }, {
@@ -198,7 +214,7 @@ const start = async () => {
                                 await sock.sendMessage(m.from, { delete: { remoteJid: m.from, fromMe: false, id: m.id, participant: m.sender } })
                                 db.data.users[m.sender].warnings += 1
                             }
-                        } 
+                        }
                     }
                 }
 
@@ -232,6 +248,10 @@ const start = async () => {
                 }
             }
         }
+    })
+
+    sock.ev.on("message.viewonce", async (update) => {
+
     })
 
     sock.ev.on("message.delete", async ({ key: { remoteJid, id, participant } }) => {
