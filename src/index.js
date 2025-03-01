@@ -160,7 +160,7 @@ const start = async () => {
                         db.data.chats[m.from].cache = db.data.chats[m.from].cache.filter(item => Date.now() - item.timestamp < 1200000)
                     }
 
-                    if (db.data.chats[m.from].antilink.status && m.isGroup && m.isBotAdmin && !m.isAdmin) {
+                    if (db.data.chats[m.from]?.antilink.status && m.isGroup && m.isBotAdmin && !m.isAdmin) {
                         const links = detect(m.body)
                         if (links.some(u => {
                             try {
