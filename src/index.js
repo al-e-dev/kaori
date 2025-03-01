@@ -201,6 +201,7 @@ const start = async () => {
                             db.data.users[m.sender].warnings = 0
                         } else if (resultado.offensive.match) {
                             if (m.isAdmin) {
+                                await sock.sendMessage(m.from, { delete: { remoteJid: m.from, fromMe: false, id: m.id, participant: m.sender } })
                                 m.reply("Stupid admin, no puedes decir eso")
                                 return
                             }
