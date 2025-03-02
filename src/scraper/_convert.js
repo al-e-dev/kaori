@@ -57,11 +57,7 @@ export default new class Convert {
 
             // Dibujar fondo blanco
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Aplicar filtro de desenfoque y opacidad (se aplicará a todo lo que se dibuje)
-            ctx.filter = 'blur(2px)';
-            ctx.globalAlpha = 0.8;
+            ctx.fillRect(0, 0, canvas.width, canvas.height)
 
             // Función para determinar el tamaño óptimo de fuente y separar en líneas sin usar padding
             const findOptimalFontSize = (text, maxWidth, maxHeight) => {
@@ -102,10 +98,10 @@ export default new class Convert {
             const { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight)
 
             // Configurar color y fuente (usamos rgba para asegurar la opacidad en el texto)
-            ctx.fillStyle = `rgba(0, 0, 0)`;
-            ctx.font = `500 ${fontSize}px "Arial Narrow"`;
-            ctx.textBaseline = 'top';
-            ctx.textAlign = 'left';
+            ctx.fillStyle = `rgba(0, 0, 0)`
+            ctx.font = `500 ${fontSize}px "Arial Narrow"`
+            ctx.textBaseline = 'top'
+            ctx.textAlign = 'left'
 
             const lineHeight = fontSize;
 
@@ -126,9 +122,10 @@ export default new class Convert {
                         x += ctx.measureText(word).width + spaceBetween;
                     });
                 }
-            });
+            })
 
-            ctx.globalAlpha = 1;
+            ctx.filter = 'blur(2px)'
+            ctx.globalAlpha = 0.8
 
             return canvas.toBuffer('image/png');
         } catch (e) {
