@@ -13,6 +13,7 @@ global._config = {
     },
     bot: {
         name: "Kaori Network",
+        credits: "© 2025 - Ｋａｏｒｉ ネットワーク",
         version: "1.0"
     },
     mods: ['51968374620', '51979549311', '573013116003'],
