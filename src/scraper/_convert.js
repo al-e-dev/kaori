@@ -76,8 +76,8 @@ export default new class Convert {
 
             let padding = 40
             let maxWidth = canvas.width - padding * 2
-            let maxWidth = canvas.height - padding * 2
-            const { size, lines } = findFontSize(text, maxWidth, maxWidth)
+            let maxHeight  = canvas.height - padding * 2
+            const { size, lines } = findFontSize(text, maxWidth, maxHeight)
 
             ctx.fillStyle = '#000000'
             ctx.font = `bold ${fontSize}px ArialNarrow`
