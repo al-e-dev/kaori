@@ -93,10 +93,15 @@ export default new class Convert {
             let maxHeight = canvas.height - padding * 2
             const { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight)
 
+            ctx.filter = ' blur(4px)'
+
             ctx.fillStyle = `rgba(0, 0, 0)`;
             ctx.font = `500 ${fontSize}px "Arial Narrow"`;
             ctx.textBaseline = 'top';
             ctx.textAlign = 'left';
+
+            ctx.drawImage(canvas, 0, 0, canvas.width / 2, canvas.height / 2);
+            ctx.drawImage(canvas, 0, 0, canvas.width / 2, canvas.height / 2, 0, 0, canvas.width, canvas.height)
 
             const lineHeight = fontSize;
 
@@ -114,10 +119,7 @@ export default new class Convert {
                         x += ctx.measureText(word).width + spaceBetween;
                     });
                 }
-            })
-
-            ctx.drawImage(canvas, 0, 0, canvas.width / 2, canvas.height / 2)
-            ctx.drawImage(canvas, 0, 0, canvas.width / 2, canvas.height / 2, 0, 0, canvas.width, canvas.height)
+            });
 
             return canvas.toBuffer('image/png');
         } catch (e) {
