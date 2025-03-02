@@ -96,6 +96,7 @@ export default new class Convert {
                 return { fontSize, lines };
             };
 
+            let padding = 40
             let maxWidth = canvas.width - padding * 2;
             let maxHeight = canvas.height - padding * 2
             const { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight)
