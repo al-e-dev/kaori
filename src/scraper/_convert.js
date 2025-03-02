@@ -53,22 +53,20 @@ export default new class Convert {
         try {
             const canvas = createCanvas(512, 512);
             const ctx = canvas.getContext('2d');
-
-            // Fondo blanco
+    
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+    
             const findOptimalFontSize = (text, maxWidth, maxHeight) => {
                 let fontSize = 170;
                 let lines = [];
                 const words = text.split(' ');
-
+    
                 while (fontSize > 0) {
                     lines = [];
                     let currentLine = [];
                     let currentWidth = 0;
-                    ctx.font = `500 ${fontSize}px Arial Narrow`;
-
+                    ctx.font = `500 ${fontSize}px "Arial Narrow"`;
                     for (const word of words) {
                         const wordWidth = ctx.measureText(word + ' ').width;
                         if (currentWidth + wordWidth <= maxWidth) {
@@ -81,7 +79,7 @@ export default new class Convert {
                         }
                     }
                     if (currentLine.length > 0) lines.push(currentLine);
-
+    
                     const lineHeight = fontSize;
                     const totalHeight = lines.length * lineHeight;
                     if (totalHeight <= maxHeight) break;
@@ -89,46 +87,41 @@ export default new class Convert {
                 }
                 return { fontSize, lines };
             };
-
-            let padding = 40;
+    
+            let padding = 20
             let maxWidth = canvas.width - padding * 2;
             let maxHeight = canvas.height - padding * 2;
             const { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight);
-
-            ctx.fillStyle = 'rgba(0, 0, 0, 1)';
-            ctx.font = `500 ${fontSize}px Arial Narrow`;
-            ctx.textBaseline = 'top';
-            ctx.textAlign = 'left';
-
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)'
-            ctx.shadowBlur = 10
-            ctx.shadowOffsetX = 2
-            ctx.shadowOffsetY = 2
-
+    
             ctx.filter = 'blur(5px)'
 
+            ctx.fillStyle = `rgba(0, 0, 0, 1)`;
+            ctx.font = `500 ${fontSize}px "Arial Narrow"`;
+            ctx.textBaseline = 'top';
+            ctx.textAlign = 'left';
+    
             const lineHeight = fontSize;
+    
             lines.forEach((line, i) => {
                 const y = i * lineHeight;
                 if (line.length === 1) {
-                    ctx.fillText(line.join(' '), padding, y + padding);
+                    ctx.fillText(line.join(' '), 0, y);
                 } else {
                     const wordsWidth = line.reduce((acc, word) => acc + ctx.measureText(word).width, 0);
                     const totalSpacing = canvas.width - wordsWidth;
                     const spaceBetween = totalSpacing / (line.length - 1);
-                    let x = padding;
+                    let x = 0;
                     line.forEach((word) => {
-                        ctx.fillText(word, x, y + padding);
+                        ctx.fillText(word, x, y);
                         x += ctx.measureText(word).width + spaceBetween;
                     });
                 }
             });
-
+    
             return canvas.toBuffer('image/png');
-
         } catch (e) {
             console.error(e);
-            throw new Error(`Error al generar la imagen: ${e.message}`);
+            return `Error: ${e.message}`;
         }
     }
 }
