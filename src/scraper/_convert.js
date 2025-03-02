@@ -74,9 +74,13 @@ export default new class Convert {
                 return { size, lines }
             };
 
-            const { size, lines } = findFontSize(text, 472, 472)
-            ctx.fillStyle = 'black'
-            ctx.font = `500 ${size}px "Arial Narrow"`
+            let padding = 40
+            let maxWidth = canvas.width - padding * 2
+            let maxWidth = canvas.height - padding * 2
+            const { size, lines } = findFontSize(text, maxWidth, maxWidth)
+
+            ctx.fillStyle = '#000000'
+            ctx.font = `bold ${fontSize}px ArialNarrow`
             ctx.textBaseline = 'top'
             ctx.textAlign = 'left'
 
@@ -85,7 +89,7 @@ export default new class Convert {
                 if (line.length === 1) ctx.fillText(line.join(' '), 0, y)
                 else {
                     const wordsWidth = line.reduce((acc, word) => acc + ctx.measureText(word).width, 0)
-                    const space = (490 - wordsWidth) / (line.length - 1)
+                    const space = (512 - wordsWidth) / (line.length - 1)
                     let x = 0;
                     line.forEach(word => { ctx.fillText(word, x, y); x += ctx.measureText(word).width + space; })
                 }
