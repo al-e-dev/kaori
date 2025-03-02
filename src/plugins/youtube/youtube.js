@@ -12,7 +12,7 @@ export default {
 
         sock.sendMessage(m.from, {
             caption: `*Título:* ${video.title}\n*Duración:* ${video.duration}\n*Canal:* ${video.author}\n*Vistas:* ${video.viewers}\n*Subido:* ${video.published}\n\n_Tiempo limite para responder 5 minutos_\n_Solo el remitente puede responder._`,
-            footer: _config.bot.name,
+            footer: _config.bot.credits,
             image: { url: video.thumbnail },
             buttons: [
                 { buttonId: 'audio', buttonText: { displayText: 'Audio' } },
