@@ -92,7 +92,7 @@ export default new class Convert {
             let maxHeight = canvas.height
             const { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight);
     
-            ctx.filter = 'blur(5px)'
+            ctx.filter = 'blur(100px)'
 
             ctx.fillStyle = `rgba(0, 0, 0, 1)`;
             ctx.font = `500 ${fontSize}px "Arial Narrow"`;
