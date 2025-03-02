@@ -51,20 +51,17 @@ export default new class Convert {
     }
     async brat(text) {
         try {
-            // Crear canvas de 500x500
-            const canvas = createCanvas(500, 500);
+            const canvas = createCanvas(512, 512);
             const ctx = canvas.getContext('2d');
-
-            // Dibujar fondo blanco
+    
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-            // Función para determinar el tamaño óptimo de fuente y separar en líneas sin usar padding
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
             const findOptimalFontSize = (text, maxWidth, maxHeight) => {
-                let fontSize = 170; // Tamaño inicial según CSS
+                let fontSize = 170;
                 let lines = [];
                 const words = text.split(' ');
-
+    
                 while (fontSize > 0) {
                     lines = [];
                     let currentLine = [];
@@ -82,8 +79,7 @@ export default new class Convert {
                         }
                     }
                     if (currentLine.length > 0) lines.push(currentLine);
-
-                    // Usar fontSize como line-height
+    
                     const lineHeight = fontSize;
                     const totalHeight = lines.length * lineHeight;
                     if (totalHeight <= maxHeight) break;
@@ -91,28 +87,27 @@ export default new class Convert {
                 }
                 return { fontSize, lines };
             };
-
-            let padding = 40
+    
+            let padding = 40;
             let maxWidth = canvas.width - padding * 2;
-            let maxHeight = canvas.height - padding * 2
-            const { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight)
-
-            // Configurar color y fuente (usamos rgba para asegurar la opacidad en el texto)
-            ctx.fillStyle = `rgba(0, 0, 0)`
-            ctx.font = `500 ${fontSize}px "Arial Narrow"`
-            ctx.textBaseline = 'top'
-            ctx.textAlign = 'left'
-
+            let maxHeight = canvas.height - padding * 2;
+            const { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight);
+    
+            ctx.fillStyle = `rgba(0, 0, 0)`;
+            ctx.font = `500 ${fontSize}px "Arial Narrow"`;
+            ctx.textBaseline = 'top';
+            ctx.textAlign = 'left';
+    
+            // Aplicar desenfoque
+            ctx.filter = 'blur(3px)';
+    
             const lineHeight = fontSize;
-
-            // Dibujar el texto comenzando desde la parte superior, alineado a la izquierda
+    
             lines.forEach((line, i) => {
                 const y = i * lineHeight;
                 if (line.length === 1) {
-                    // Línea con una sola palabra: alinear a la izquierda
                     ctx.fillText(line.join(' '), 0, y);
                 } else {
-                    // Línea con varias palabras: justificar la línea
                     const wordsWidth = line.reduce((acc, word) => acc + ctx.measureText(word).width, 0);
                     const totalSpacing = canvas.width - wordsWidth;
                     const spaceBetween = totalSpacing / (line.length - 1);
@@ -122,15 +117,12 @@ export default new class Convert {
                         x += ctx.measureText(word).width + spaceBetween;
                     });
                 }
-            })
-
-            ctx.filter = 'blur(10px)'
-            ctx.globalAlpha = 0.8
-
+            });
+    
             return canvas.toBuffer('image/png');
         } catch (e) {
             console.error(e);
-            await m.reply(`Terjadi kesalahan saat membuat stiker: ${e.message}`);
+            return `Error: ${e.message}`;
         }
     }
 }
