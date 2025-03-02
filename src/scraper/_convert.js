@@ -96,12 +96,12 @@ export default new class Convert {
                 return { fontSize, lines };
             };
 
-            const maxWidth = canvas.width;
-            const maxHeight = canvas.height;
-            const { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight);
+            let maxWidth = canvas.width - padding * 2;
+            let maxHeight = canvas.height - padding * 2
+            const { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight)
 
             // Configurar color y fuente (usamos rgba para asegurar la opacidad en el texto)
-            ctx.fillStyle = `rgba(0, 0, 0, 0.8)`;
+            ctx.fillStyle = `rgba(0, 0, 0)`;
             ctx.font = `500 ${fontSize}px "Arial Narrow"`;
             ctx.textBaseline = 'top';
             ctx.textAlign = 'left';
