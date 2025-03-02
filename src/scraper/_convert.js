@@ -54,9 +54,11 @@ export default new class Convert {
             const canvas = createCanvas(512, 512);
             const ctx = canvas.getContext('2d');
     
+            // Fondo blanco
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
     
+            // Función para calcular el tamaño óptimo del texto
             const findOptimalFontSize = (text, maxWidth, maxHeight) => {
                 let fontSize = 170;
                 let lines = [];
@@ -67,6 +69,7 @@ export default new class Convert {
                     let currentLine = [];
                     let currentWidth = 0;
                     ctx.font = `500 ${fontSize}px "Arial Narrow"`;
+    
                     for (const word of words) {
                         const wordWidth = ctx.measureText(word + ' ').width;
                         if (currentWidth + wordWidth <= maxWidth) {
@@ -88,20 +91,46 @@ export default new class Convert {
                 return { fontSize, lines };
             };
     
-            let padding = 20
-            let maxWidth = canvas.width - padding * 2;
-            let maxHeight = canvas.height - padding * 2;
+            let maxWidth = canvas.width;
+            let maxHeight = canvas.height;
             const { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight);
     
-            ctx.filter = 'blur(5px)'
-
-            ctx.fillStyle = `rgba(0, 0, 0, 1)`;
-            ctx.font = `500 ${fontSize}px "Arial Narrow"`;
             ctx.textBaseline = 'top';
             ctx.textAlign = 'left';
-    
             const lineHeight = fontSize;
     
+            // 💡 Efecto de desenfoque: Dibujar el texto varias veces con pequeñas variaciones
+            for (let blurAmount = 8; blurAmount > 0; blurAmount--) {
+                let alpha = 0.05 * blurAmount; // Controla la opacidad para suavizar el desenfoque
+                ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
+    
+                lines.forEach((line, i) => {
+                    const y = i * lineHeight;
+                    if (line.length === 1) {
+                        for (let dx = -blurAmount; dx <= blurAmount; dx++) {
+                            for (let dy = -blurAmount; dy <= blurAmount; dy++) {
+                                ctx.fillText(line.join(' '), dx, y + dy);
+                            }
+                        }
+                    } else {
+                        const wordsWidth = line.reduce((acc, word) => acc + ctx.measureText(word).width, 0);
+                        const totalSpacing = canvas.width - wordsWidth;
+                        const spaceBetween = totalSpacing / (line.length - 1);
+                        let x = 0;
+                        line.forEach((word) => {
+                            for (let dx = -blurAmount; dx <= blurAmount; dx++) {
+                                for (let dy = -blurAmount; dy <= blurAmount; dy++) {
+                                    ctx.fillText(word, x + dx, y + dy);
+                                }
+                            }
+                            x += ctx.measureText(word).width + spaceBetween;
+                        });
+                    }
+                });
+            }
+    
+            // Texto final bien definido
+            ctx.fillStyle = `rgba(0, 0, 0, 1)`;
             lines.forEach((line, i) => {
                 const y = i * lineHeight;
                 if (line.length === 1) {
