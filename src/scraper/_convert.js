@@ -127,8 +127,6 @@ export default new class Convert {
                 }
             });
 
-            // Restaurar configuraciones por si se requieren en futuras operaciones
-            ctx.filter = 'none';
             ctx.globalAlpha = 1;
 
             return canvas.toBuffer('image/png');
