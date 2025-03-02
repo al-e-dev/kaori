@@ -53,15 +53,15 @@ export default new class Convert {
         try {
             const canvas = createCanvas(512, 512)
             const ctx = canvas.getContext('2d')
-    
+
             ctx.fillStyle = '#ffffff'
             ctx.fillRect(0, 0, canvas.width, canvas.height)
-    
+
             const findOptimalFontSize = (text, maxWidth, maxHeight) => {
                 let fontSize = 170
                 let lines = [];
                 const words = text.split(' ');
-    
+
                 while (fontSize > 0) {
                     lines = [];
                     let currentLine = [];
@@ -79,7 +79,7 @@ export default new class Convert {
                         }
                     }
                     if (currentLine.length > 0) lines.push(currentLine);
-    
+
                     const lineHeight = fontSize;
                     const totalHeight = lines.length * lineHeight;
                     if (totalHeight <= maxHeight) break;
@@ -91,17 +91,15 @@ export default new class Convert {
             let padding = 20;
             let maxWidth = canvas.width - padding * 2
             let maxHeight = canvas.height - padding * 2
-            const { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight);
-    
-            ctx.filter = 'blur(100px)'
+            const { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight)
 
             ctx.fillStyle = `rgba(0, 0, 0)`;
             ctx.font = `500 ${fontSize}px "Arial Narrow"`;
             ctx.textBaseline = 'top';
             ctx.textAlign = 'left';
-    
+
             const lineHeight = fontSize;
-    
+
             lines.forEach((line, i) => {
                 const y = i * lineHeight;
                 if (line.length === 1) {
@@ -116,8 +114,11 @@ export default new class Convert {
                         x += ctx.measureText(word).width + spaceBetween;
                     });
                 }
-            });
-    
+            })
+
+            ctx.drawImage(canvas, 0, 0, canvas.width / 2, canvas.height / 2)
+            ctx.drawImage(canvas, 0, 0, canvas.width / 2, canvas.height / 2, 0, 0, canvas.width, canvas.height)
+
             return canvas.toBuffer('image/png');
         } catch (e) {
             console.error(e);
