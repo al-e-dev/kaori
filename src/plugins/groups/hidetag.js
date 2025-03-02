@@ -10,6 +10,5 @@ export default {
         })
     },
     isOwner: true,
-    isAdmin: true,
     isGroup: true
 }
