@@ -51,24 +51,25 @@ export default new class Convert {
     }
     async brat(text) {
         try {
-            const canvas = createCanvas(512, 512)
-            const ctx = canvas.getContext('2d')
-
+            const canvas = createCanvas(512, 512);
+            const ctx = canvas.getContext('2d');
+    
+            // Fondo blanco
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+    
             const findOptimalFontSize = (text, maxWidth, maxHeight) => {
-                let fontSize = 100
-                ctx.font = `bold ${fontSize}px ArialNarrow`;
-                const words = text.split(' ')
-                let lines = []
-
+                let fontSize = 170;
+                ctx.font = `${fontSize}px Arial Narrow`;
+                const words = text.split(' ');
+                let lines = [];
+    
                 while (fontSize > 0) {
                     lines = [];
                     let currentLine = [];
                     let currentWidth = 0;
-                    ctx.font = `bold ${fontSize}px ArialNarrow`
-
+                    ctx.font = `${fontSize}px Arial Narrow`;
+    
                     for (const word of words) {
                         const wordWidth = ctx.measureText(word + ' ').width;
                         if (currentWidth + wordWidth <= maxWidth) {
@@ -80,49 +81,40 @@ export default new class Convert {
                             currentWidth = wordWidth;
                         }
                     }
-
                     if (currentLine.length > 0) lines.push(currentLine);
-
+    
                     const totalHeight = lines.length * (fontSize + 10);
                     if (totalHeight <= maxHeight) break;
-
+    
                     fontSize -= 2;
                 }
                 return { fontSize, lines };
             };
-
-            let padding = 50
-            let maxWidth = canvas.width - padding * 2
-            let maxHeight = canvas.height - padding * 2
+    
+            let padding = 40;
+            let maxWidth = canvas.width - padding * 2;
+            let maxHeight = canvas.height - padding * 2;
             let { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight);
-
-            ctx.fillStyle = '#000000';
-            ctx.font = `bold ${fontSize}px ArialNarrow`;
-
-            let lineHeight = fontSize + 15
-            let totalHeight = lines.length * lineHeight;
-            let startY = (canvas.height - totalHeight) / 2 + fontSize / 2;
-
+    
+            ctx.fillStyle = 'black';
+            ctx.font = `500 ${fontSize}px Arial Narrow`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+    
+            // Aplicar desenfoque
+            ctx.filter = 'blur(2px)';
+    
+            let lineHeight = fontSize + 10;
+            let startY = (canvas.height - lines.length * lineHeight) / 2;
+    
             lines.forEach((line, i) => {
-                if (line.length === 1) {
-                    ctx.textAlign = 'left';
-                    ctx.fillText(line.join(' '), padding, startY + i * lineHeight);
-                } else {
-                    let totalSpacing = maxWidth - line.reduce((acc, word) => acc + ctx.measureText(word).width, 0);
-                    let spaceBetween = line.length > 1 ? totalSpacing / (line.length - 1) : 0;
-
-                    let currentX = padding;
-                    line.forEach((word) => {
-                        ctx.fillText(word, currentX, startY + i * lineHeight);
-                        currentX += ctx.measureText(word).width + spaceBetween;
-                    })
-                }
-            })
-
+                const lineText = line.join(' ');
+                ctx.fillText(lineText, canvas.width / 2, startY + i * lineHeight);
+            });
+    
             return canvas.toBuffer('image/png')
         } catch (e) {
-            console.error(e);
-            await m.reply(`Terjadi kesalahan saat membuat stiker: ${e.message}`);
+            throw new Error(`Error generating image: ${e.message}`);
         }
     }
 }
