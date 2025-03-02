@@ -1,4 +1,5 @@
 import { createCanvas, loadImage, registerFont } from 'canvas'
+import jimp from 'jimp'
 
 registerFont('./src/font/arialnarrow.ttf', { family: 'ArialNarrow' })
 
@@ -88,12 +89,13 @@ export default new class Convert {
                     let x = 0;
                     line.forEach(word => { ctx.fillText(word, x, y); x += ctx.measureText(word).width + space; })
                 }
-            });
+            })
 
-            ctx.filter = 'blur(4px)'
-            ctx.drawImage(canvas, 0, 0)
-
-            return canvas.toBuffer('image/png')
+            let buffer = canvas.toBuffer()
+            let image = await jimp.read(buffer)
+            image.blur(2)
+    
+            return image.getBufferAsync(jimp.MIME_PNG)
         } catch (e) {
             return `Error: ${e.message}`
         }
