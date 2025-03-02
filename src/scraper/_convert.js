@@ -58,7 +58,7 @@ export default new class Convert {
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             const findOptimalFontSize = (text, maxWidth, maxHeight) => {
-                let fontSize = 100;
+                let fontSize = 100
                 ctx.font = `bold ${fontSize}px ArialNarrow`;
                 const words = text.split(' ')
                 let lines = []
@@ -91,15 +91,15 @@ export default new class Convert {
                 return { fontSize, lines };
             };
 
-            let padding = 40;
-            let maxWidth = canvas.width - padding * 2;
-            let maxHeight = canvas.height - padding * 2;
+            let padding = 50
+            let maxWidth = canvas.width - padding * 2
+            let maxHeight = canvas.height - padding * 2
             let { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight);
 
             ctx.fillStyle = '#000000';
             ctx.font = `bold ${fontSize}px ArialNarrow`;
 
-            let lineHeight = fontSize + 10;
+            let lineHeight = fontSize + 15
             let totalHeight = lines.length * lineHeight;
             let startY = (canvas.height - totalHeight) / 2 + fontSize / 2;
 
