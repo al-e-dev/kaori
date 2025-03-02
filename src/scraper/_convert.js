@@ -74,7 +74,7 @@ export default new class Convert {
                 return { size, lines };
             };
 
-            const padding = 15; // Padding reducido
+            const padding = 2
             const maxWidth = canvas.width - padding * 2;
             const maxHeight = canvas.height - padding * 2;
             const { size, lines } = findFontSize(text, maxWidth, maxHeight);
