@@ -51,7 +51,7 @@ export default new class Convert {
     }
     async brat(text) {
         try {
-            const canvas = createCanvas(170, 170);
+            const canvas = createCanvas(100, 100);
             const ctx = canvas.getContext('2d');
     
             ctx.fillStyle = '#ffffff';
@@ -94,7 +94,7 @@ export default new class Convert {
     
             ctx.filter = 'blur(100px)'
 
-            ctx.fillStyle = `rgba(0, 0, 0, 1)`;
+            ctx.fillStyle = `rgba(0, 0, 0)`;
             ctx.font = `500 ${fontSize}px "Arial Narrow"`;
             ctx.textBaseline = 'top';
             ctx.textAlign = 'left';
