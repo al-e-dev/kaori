@@ -80,7 +80,7 @@ export default new class Convert {
             const { size, lines } = findFontSize(text, maxWidth, maxHeight)
 
             ctx.fillStyle = '#000000'
-            ctx.font = `bold ${fontSize}px ArialNarrow`
+            ctx.font = `bold ${size}px ArialNarrow`
             ctx.textBaseline = 'top'
             ctx.textAlign = 'left'
 
