@@ -57,51 +57,49 @@ export default new class Convert {
             ctx.fillStyle = '#fff'
             ctx.fillRect(0, 0, 512, 512)
 
+            const padding = 20, maxWidth = 512 - padding * 2, maxHeight = 512 - padding * 2
+
             const findFontSize = (t, w, h) => {
                 let size = 170, lines = []
                 while (size > 0) {
-                    lines = []; let line = [], width = 0
+                    lines = []
+                    let line = [], width = 0
                     ctx.font = `500 ${size}px "Arial Narrow"`
                     for (const word of t.split(' ')) {
                         const wordWidth = ctx.measureText(word + ' ').width
                         if (width + wordWidth <= w) line.push(word), width += wordWidth
-                        else { lines.push(line); line = [word]; width = wordWidth; }
+                        else lines.push(line), line = [word], width = wordWidth
                     }
                     if (line.length) lines.push(line)
                     if (lines.length * size <= h) break
                     size -= 2
                 }
                 return { size, lines }
-            };
+            }
 
-            const { size, lines } = findFontSize(text, 472, 472)
+            const { size, lines } = findFontSize(text, maxWidth, maxHeight)
 
-            ctx.fillStyle = '#000000'
+            ctx.fillStyle = '#000'
             ctx.font = `500 ${size}px "Arial Narrow"`
             ctx.textBaseline = 'top'
-            ctx.textAlign = 'left'
+            ctx.textAlign = 'center'
 
-            let totalHeight = lines.length * size
-            let startY = (512 - totalHeight) / 2
+            const totalTextHeight = lines.length * size, startY = (512 - totalTextHeight) / 2
 
             lines.forEach((line, i) => {
                 const y = startY + i * size
-
-                if (line.length === 1) {
-                    let textWidth = ctx.measureText(line.join(' ')).width
-                    let startX = (512 - textWidth) / 2
-                    ctx.fillText(line.join(' '), startX, y)
-                } else {
+                if (line.length === 1) ctx.fillText(line.join(' '), 512 / 2, y)
+                else {
                     const wordsWidth = line.reduce((acc, word) => acc + ctx.measureText(word).width, 0)
-                    const space = (512 - wordsWidth) / (line.length - 1)
-                    let x = (512 - (wordsWidth + space * (line.length - 1))) / 2
-                    line.forEach(word => { ctx.fillText(word, x, y); x += ctx.measureText(word).width + space; })
+                    const space = (maxWidth - wordsWidth) / (line.length - 1)
+                    let x = padding
+                    line.forEach(word => { ctx.fillText(word, x, y); x += ctx.measureText(word).width + space })
                 }
             })
 
             let buffer = canvas.toBuffer()
             let image = await jimp.read(buffer)
-            image.blur(4)
+            image.blur(3)
 
             return image.getBufferAsync(jimp.MIME_PNG)
         } catch (e) {
