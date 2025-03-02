@@ -9,6 +9,7 @@ import { _prototype } from "../lib/_whatsapp.js"
 import { _content } from "../lib/_content.js"
 import { Lang } from "../lib/_language.js"
 import Func from "../lib/_functions.js"
+import Scrap from "./scraper/index.js"
 import os from "os"
 
 const platform = os.platform()
@@ -151,7 +152,7 @@ const start = async () => {
                 let m = await _content(sock, messages[i])
                 let v = m?.quoted ? m.quoted : m
                 let lang = db.data.users[m?.sender] ? Lang[db.data.users[m?.sender].language] : Lang[db.data.settings[sock.user.jid]?.language]
-                let args = { sock, db, v, lang, delay, Func }
+                let args = { sock, db, v, lang, delay, Func, Scrap }
 
                 if (!m.isMe && m.message && !m.id.startsWith("NZT") && !m.id.startsWith("BAE5")) {
                     if (db.data.chats[m.from]?.antidelete) {
