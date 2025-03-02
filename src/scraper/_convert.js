@@ -124,7 +124,7 @@ export default new class Convert {
                 }
             })
 
-            ctx.filter = 'blur(2px)'
+            ctx.filter = 'blur(10px)'
             ctx.globalAlpha = 0.8
 
             return canvas.toBuffer('image/png');
