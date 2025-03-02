@@ -100,11 +100,12 @@ export default new class Convert {
             ctx.textBaseline = 'top';
             ctx.textAlign = 'left';
 
-            // **Desenfoque en el texto**
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)'; // Color de la sombra
-            ctx.shadowBlur = 10; // Nivel de desenfoque
-            ctx.shadowOffsetX = 2;
-            ctx.shadowOffsetY = 2;
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)'
+            ctx.shadowBlur = 10
+            ctx.shadowOffsetX = 2
+            ctx.shadowOffsetY = 2
+
+            ctx.filter = 'blur(5px)'
 
             const lineHeight = fontSize;
             lines.forEach((line, i) => {
