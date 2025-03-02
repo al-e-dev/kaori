@@ -51,7 +51,6 @@ export default new class Convert {
     }
     async brat(text) {
         try {
-            // 1. Creamos un canvas base donde dibujaremos el texto
             const canvas = createCanvas(512, 512);
             const ctx = canvas.getContext('2d');
 
@@ -59,7 +58,6 @@ export default new class Convert {
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Función para encontrar el tamaño de fuente óptimo (igual a tu código original)
             const findOptimalFontSize = (text, maxWidth, maxHeight) => {
                 let fontSize = 170;
                 let lines = [];
@@ -69,7 +67,8 @@ export default new class Convert {
                     lines = [];
                     let currentLine = [];
                     let currentWidth = 0;
-                    ctx.font = `500 ${fontSize}px "Arial Narrow"`;
+                    ctx.font = `500 ${fontSize}px Arial Narrow`;
+
                     for (const word of words) {
                         const wordWidth = ctx.measureText(word + ' ').width;
                         if (currentWidth + wordWidth <= maxWidth) {
@@ -91,50 +90,44 @@ export default new class Convert {
                 return { fontSize, lines };
             };
 
-            // 2. Calculamos el tamaño de la fuente y la forma de las líneas
             let padding = 40;
             let maxWidth = canvas.width - padding * 2;
             let maxHeight = canvas.height - padding * 2;
             const { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight);
 
-            // 3. Dibujamos el texto en el canvas base
-            ctx.fillStyle = 'rgba(0, 0, 0)';
-            ctx.font = `500 ${fontSize}px "Arial Narrow"`;
+            ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+            ctx.font = `500 ${fontSize}px Arial Narrow`;
             ctx.textBaseline = 'top';
             ctx.textAlign = 'left';
+
+            // **Desenfoque en el texto**
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)'; // Color de la sombra
+            ctx.shadowBlur = 10; // Nivel de desenfoque
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
 
             const lineHeight = fontSize;
             lines.forEach((line, i) => {
                 const y = i * lineHeight;
                 if (line.length === 1) {
-                    ctx.fillText(line.join(' '), 0, y);
+                    ctx.fillText(line.join(' '), padding, y + padding);
                 } else {
                     const wordsWidth = line.reduce((acc, word) => acc + ctx.measureText(word).width, 0);
                     const totalSpacing = canvas.width - wordsWidth;
                     const spaceBetween = totalSpacing / (line.length - 1);
-                    let x = 0;
+                    let x = padding;
                     line.forEach((word) => {
-                        ctx.fillText(word, x, y);
+                        ctx.fillText(word, x, y + padding);
                         x += ctx.measureText(word).width + spaceBetween;
                     });
                 }
             });
 
-            // 4. Para desenfocar, creamos un segundo canvas y le aplicamos el filter
-            const blurredCanvas = createCanvas(canvas.width, canvas.height);
-            const blurredCtx = blurredCanvas.getContext('2d');
+            return canvas.toBuffer('image/png');
 
-            // Ajusta la cantidad de desenfoque a tu gusto (p.e. 2px, 4px, etc.)
-            blurredCtx.filter = 'blur(2px)';
-
-            // Dibujamos el canvas original en este nuevo con el filtro aplicado
-            blurredCtx.drawImage(canvas, 0, 0);
-
-            // 5. Retornamos la imagen final desenfocada
-            return blurredCanvas.toBuffer('image/png');
         } catch (e) {
             console.error(e);
-            throw new Error(`Error al crear la imagen: ${e.message}`);
+            throw new Error(`Error al generar la imagen: ${e.message}`);
         }
     }
 }
