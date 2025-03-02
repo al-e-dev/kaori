@@ -93,7 +93,7 @@ export default new class Convert {
 
             let buffer = canvas.toBuffer()
             let image = await jimp.read(buffer)
-            image.blur(2)
+            image.blur(4)
     
             return image.getBufferAsync(jimp.MIME_PNG)
         } catch (e) {
