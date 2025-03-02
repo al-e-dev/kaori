@@ -57,43 +57,43 @@ export default new class Convert {
             ctx.fillStyle = '#fff'
             ctx.fillRect(0, 0, 512, 512)
 
-            const padding = 20, maxWidth = 512 - padding * 2, maxHeight = 512 - padding * 2
-
             const findFontSize = (t, w, h) => {
                 let size = 170, lines = []
                 while (size > 0) {
-                    lines = []
-                    let line = [], width = 0
+                    lines = []; let line = [], width = 0
                     ctx.font = `500 ${size}px "Arial Narrow"`
                     for (const word of t.split(' ')) {
                         const wordWidth = ctx.measureText(word + ' ').width
                         if (width + wordWidth <= w) line.push(word), width += wordWidth
-                        else lines.push(line), line = [word], width = wordWidth
+                        else { lines.push(line); line = [word]; width = wordWidth; }
                     }
                     if (line.length) lines.push(line)
                     if (lines.length * size <= h) break
                     size -= 2
                 }
                 return { size, lines }
-            }
+            };
 
+            let padding = 40;
+            let maxWidth = canvas.width - padding * 2
+            let maxHeight = canvas.height - padding * 2
             const { size, lines } = findFontSize(text, maxWidth, maxHeight)
 
-            ctx.fillStyle = '#000'
+            ctx.fillStyle = '#000000'
             ctx.font = `500 ${size}px "Arial Narrow"`
             ctx.textBaseline = 'top'
-            ctx.textAlign = 'center'
+            ctx.textAlign = 'left'
 
-            const totalTextHeight = lines.length * size, startY = (512 - totalTextHeight) / 2
+            let lineHeight = size + 10
+            let totalHeight = lines.length * lineHeight
+            let startY = (canvas.height - totalHeight) / 2 + size / 2
 
             lines.forEach((line, i) => {
-                const y = startY + i * size
-                if (line.length === 1) ctx.fillText(line.join(' '), 512 / 2, y)
+                if (line.length === 1) ctx.fillText(line.join(' '), padding, startY + i * lineHeight)
                 else {
                     const wordsWidth = line.reduce((acc, word) => acc + ctx.measureText(word).width, 0)
-                    const space = (maxWidth - wordsWidth) / (line.length - 1)
-                    let x = padding
-                    line.forEach(word => { ctx.fillText(word, x, y); x += ctx.measureText(word).width + space })
+                    const space = (512 - wordsWidth) / (line.length - 1)
+                    line.forEach(word => { ctx.fillText(word, padding, startY + i * lineHeight); x += ctx.measureText(word).width + space; })
                 }
             })
 
