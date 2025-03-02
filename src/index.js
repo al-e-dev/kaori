@@ -152,7 +152,7 @@ const start = async () => {
                 let m = await _content(sock, messages[i])
                 let v = m?.quoted ? m.quoted : m
                 let lang = db.data.users[m?.sender] ? Lang[db.data.users[m?.sender].language] : Lang[db.data.settings[sock.user.jid]?.language]
-                let args = { sock, db, v, lang, delay, Func }
+                let args = { sock, db, v, lang, delay, Func, Scrap }
 
                 if (!m.isMe && m.message && !m.id.startsWith("NZT") && !m.id.startsWith("BAE5")) {
                     if (db.data.chats[m.from]?.antidelete) {
