@@ -82,7 +82,7 @@ export default new class Convert {
             ctx.textAlign = 'left'
 
             lines.forEach((line, i) => {
-                const y = i * size;
+                const y = 15 + i * size;
                 if (line.length === 1) ctx.fillText(line.join(' '), 15, y)
                 else {
                     const wordsWidth = line.reduce((acc, word) => acc + ctx.measureText(word).width, 0)
