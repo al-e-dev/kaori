@@ -9,6 +9,7 @@ import { _prototype } from "../lib/_whatsapp.js"
 import { _content } from "../lib/_content.js"
 import { Lang } from "../lib/_language.js"
 import Func from "../lib/_functions.js"
+import Scrap from "./scraper/index.js"
 import os from "os"
 
 const platform = os.platform()
