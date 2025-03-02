@@ -1,5 +1,7 @@
 import { createCanvas, loadImage, registerFont } from 'canvas'
 
+registerFont('./src/font/arialnarrow.ttf', { family: 'ArialNarrow' })
+
 export default new class Convert {
     async spotify(tituloMusica, autor, imagenCover) {
         try {
@@ -49,8 +51,8 @@ export default new class Convert {
     }
     async brat(text) {
         try {
-            const canvas = createCanvas(512, 512);
-            const ctx = canvas.getContext('2d');
+            const canvas = createCanvas(512, 512)
+            const ctx = canvas.getContext('2d')
 
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -58,14 +60,14 @@ export default new class Convert {
             const findOptimalFontSize = (text, maxWidth, maxHeight) => {
                 let fontSize = 100;
                 ctx.font = `bold ${fontSize}px ArialNarrow`;
-                const words = text.split(' ');
-                let lines = [];
+                const words = text.split(' ')
+                let lines = []
 
                 while (fontSize > 0) {
                     lines = [];
                     let currentLine = [];
                     let currentWidth = 0;
-                    ctx.font = `bold ${fontSize}px ArialNarrow`;
+                    ctx.font = `bold ${fontSize}px ArialNarrow`
 
                     for (const word of words) {
                         const wordWidth = ctx.measureText(word + ' ').width;
