@@ -51,52 +51,51 @@ export default new class Convert {
     }
     async brat(text) {
         try {
-            const canvas = createCanvas(512, 512);
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(0, 0, 512, 512);
+            const canvas = createCanvas(512, 512)
+            const ctx = canvas.getContext('2d')
+            ctx.fillStyle = '#fff'
+            ctx.fillRect(0, 0, 512, 512)
 
             const findFontSize = (t, w, h) => {
-                let size = 170, lines = [];
+                let size = 170, lines = []
                 while (size > 0) {
-                    lines = []; let line = [], width = 0;
-                    ctx.font = `500 ${size}px "Arial Narrow"`;
+                    lines = []; let line = [], width = 0
+                    ctx.font = `500 ${size}px "Arial Narrow"`
                     for (const word of t.split(' ')) {
-                        const wordWidth = ctx.measureText(word + ' ').width;
-                        if (width + wordWidth <= w) line.push(word), width += wordWidth;
+                        const wordWidth = ctx.measureText(word + ' ').width
+                        if (width + wordWidth <= w) line.push(word), width += wordWidth
                         else { lines.push(line); line = [word]; width = wordWidth; }
                     }
-                    if (line.length) lines.push(line);
-                    if (lines.length * size <= h) break;
-                    size -= 2;
+                    if (line.length) lines.push(line)
+                    if (lines.length * size <= h) break
+                    size -= 2
                 }
-                return { size, lines };
+                return { size, lines }
             };
 
-            const { size, lines } = findFontSize(text, 472, 472);
-            ctx.fillStyle = 'black';
-            ctx.font = `500 ${size}px "Arial Narrow"`;
-            ctx.textBaseline = 'top';
-            ctx.textAlign = 'left';
+            const { size, lines } = findFontSize(text, 472, 472)
+            ctx.fillStyle = 'black'
+            ctx.font = `500 ${size}px "Arial Narrow"`
+            ctx.textBaseline = 'top'
+            ctx.textAlign = 'left'
 
             lines.forEach((line, i) => {
                 const y = i * size;
-                if (line.length === 1) ctx.fillText(line.join(' '), 0, y);
+                if (line.length === 1) ctx.fillText(line.join(' '), 0, y)
                 else {
-                    const wordsWidth = line.reduce((acc, word) => acc + ctx.measureText(word).width, 0);
-                    const space = (512 - wordsWidth) / (line.length - 1);
+                    const wordsWidth = line.reduce((acc, word) => acc + ctx.measureText(word).width, 0)
+                    const space = (512 - wordsWidth) / (line.length - 1)
                     let x = 0;
-                    line.forEach(word => { ctx.fillText(word, x, y); x += ctx.measureText(word).width + space; });
+                    line.forEach(word => { ctx.fillText(word, x, y); x += ctx.measureText(word).width + space; })
                 }
             });
 
-            ctx.filter = 'blur(4px)';
+            ctx.filter = 'blur(4px)'
             ctx.drawImage(canvas, 0, 0)
 
-            return canvas.toBuffer('image/png');
+            return canvas.toBuffer('image/png')
         } catch (e) {
-            console.error(e);
-            return `Error: ${e.message}`;
+            return `Error: ${e.message}`
         }
     }
 }
