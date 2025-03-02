@@ -95,7 +95,7 @@ export default new class Convert {
 
             ctx.filter = ' blur(4px)'
 
-            ctx.fillStyle = `rgba(0, 0, 0)`;
+            ctx.fillStyle = `rgba(0, 0, 0, 1)`;
             ctx.font = `500 ${fontSize}px "Arial Narrow"`;
             ctx.textBaseline = 'top';
             ctx.textAlign = 'left';
