@@ -74,23 +74,27 @@ export default new class Convert {
                 return { size, lines }
             };
 
-            let padding = 40
-            let maxWidth = canvas.width - padding * 2
-            let maxHeight  = canvas.height - padding * 2
-            const { size, lines } = findFontSize(text, maxWidth, maxHeight)
+            const { size, lines } = findFontSize(text, 472, 472)
 
             ctx.fillStyle = '#000000'
-            ctx.font = `bold ${size}px ArialNarrow`
+            ctx.font = `500 ${size}px "Arial Narrow"`
             ctx.textBaseline = 'top'
             ctx.textAlign = 'left'
 
+            let totalHeight = lines.length * size
+            let startY = (512 - totalHeight) / 2
+
             lines.forEach((line, i) => {
-                const y = i * size;
-                if (line.length === 1) ctx.fillText(line.join(' '), 0, y)
-                else {
+                const y = startY + i * size
+
+                if (line.length === 1) {
+                    let textWidth = ctx.measureText(line.join(' ')).width
+                    let startX = (512 - textWidth) / 2
+                    ctx.fillText(line.join(' '), startX, y)
+                } else {
                     const wordsWidth = line.reduce((acc, word) => acc + ctx.measureText(word).width, 0)
                     const space = (512 - wordsWidth) / (line.length - 1)
-                    let x = 0;
+                    let x = (512 - (wordsWidth + space * (line.length - 1))) / 2
                     line.forEach(word => { ctx.fillText(word, x, y); x += ctx.measureText(word).width + space; })
                 }
             })
@@ -98,7 +102,7 @@ export default new class Convert {
             let buffer = canvas.toBuffer()
             let image = await jimp.read(buffer)
             image.blur(4)
-    
+
             return image.getBufferAsync(jimp.MIME_PNG)
         } catch (e) {
             return `Error: ${e.message}`
