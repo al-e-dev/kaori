@@ -1,7 +1,6 @@
-import { createCanvas, loadImage } from 'canvas'
+import { createCanvas, loadImage, registerFont } from 'canvas'
 
 export default new class Convert {
-
     async spotify(tituloMusica, autor, imagenCover) {
         try {
             const fondo = await loadImage("./src/media/spotify.png"),
@@ -43,6 +42,88 @@ export default new class Convert {
             ctx.clip();
             ctx.drawImage(cover, imagex, imagey, imagesize, imagesize);
             ctx.restore();
+            return canvas.toBuffer('image/png')
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+    async brat(text) {
+        try {
+            const img = await loadImage("https://files.catbox.moe/vkoaby.jpg")
+            const canvas = createCanvas(img.width, img.height)
+            const ctx = canvas.getContext('2d')
+    
+            ctx.drawImage(img, 0, 0, img.width, img.height)
+    
+            const paper_x = img.width * 0.285
+            const paper_y = img.height * 0.42
+            const paper_width = img.width * 0.42
+            const paper_height = img.height * 0.32
+    
+            let font_size = Math.min(paper_width / 7.5, paper_height / 3.5)
+            ctx.font = '${font_size}px Georgia'
+            ctx.fillStyle = 'black'
+    
+            const max_width = paper_width * 0.88
+            let words = text.split(' ')
+            let lines = []
+            let line = ''
+    
+            for (let word of words) {
+                let test_line = line + (line ? ' ' : '') + word
+                let test_width = ctx.measureText(test_line).width
+    
+                if (test_width > max_width && line) {
+                    lines.push(line)
+                    line = word
+                } else {
+                    line = test_line
+                }
+            }
+            if (line) lines.push(line)
+    
+            while (lines.length * font_size > paper_height * 0.85) {
+                font_size -= 2
+                ctx.font = '${font_size}px Georgia'
+    
+                let tmp_lines = []
+                let tmp_line = ''
+                for (let word of words) {
+                    let test_line = tmp_line + (tmp_line ? ' ' : '') + word
+                    let test_width = ctx.measureText(test_line).width
+    
+                    if (test_width > max_width && tmp_line) {
+                        tmp_lines.push(tmp_line)
+                        tmp_line = word
+                    } else {
+                        tmp_line = test_line
+                    }
+                }
+                if (tmp_line) tmp_lines.push(tmp_line)
+                lines = tmp_lines
+            }
+    
+            let line_height = font_size * 1.15
+            let text_height = lines.length * line_height
+    
+            let textStartY = paper_y + (paper_height - text_height) / 2 + (lines.length > 2 ? 270 : 275)
+    
+            ctx.save()
+            ctx.translate(paper_x + paper_width / 2 + 24, textStartY)
+            ctx.rotate(0.12)
+    
+            ctx.textAlign = 'center'
+    
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)'
+            ctx.shadowBlur = 3
+            ctx.shadowOffsetX = 2
+            ctx.shadowOffsetY = 2
+    
+            for (let i = 0; i < lines.length; i++) {
+                ctx.fillText(lines[i], 0, i * line_height)
+            }
+            
+            ctx.restore()    
             return canvas.toBuffer('image/png')
         } catch (error) {
             console.error('Error:', error);
