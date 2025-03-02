@@ -74,7 +74,7 @@ export default new class Convert {
                 return { size, lines }
             };
 
-            let padding = 40;
+            let padding = 20
             let maxWidth = canvas.width - padding * 2
             let maxHeight = canvas.height - padding * 2
             const { size, lines } = findFontSize(text, maxWidth, maxHeight)
@@ -93,7 +93,7 @@ export default new class Convert {
                 else {
                     const wordsWidth = line.reduce((acc, word) => acc + ctx.measureText(word).width, 0)
                     const space = (512 - wordsWidth) / (line.length - 1)
-                    let x = 0
+                    let x = padding
                     line.forEach(word => { ctx.fillText(word, x, startY + i * lineHeight); x += ctx.measureText(word).width + space; })
                 }
             })
