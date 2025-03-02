@@ -9,6 +9,7 @@ export default {
             contextInfo: { mentionedJid: m.metadata.participants.map((p) => p.id), remoteJid: m.from }
         })
     },
+    isOwner: true,
     isAdmin: true,
     isGroup: true
 }
