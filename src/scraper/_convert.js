@@ -49,84 +49,78 @@ export default new class Convert {
     }
     async brat(text) {
         try {
-            const img = await loadImage("https://files.catbox.moe/vkoaby.jpg")
-            const canvas = createCanvas(img.width, img.height)
-            const ctx = canvas.getContext('2d')
-    
-            ctx.drawImage(img, 0, 0, img.width, img.height)
-    
-            const paper_x = img.width * 0.285
-            const paper_y = img.height * 0.42
-            const paper_width = img.width * 0.42
-            const paper_height = img.height * 0.32
-    
-            let font_size = Math.min(paper_width / 7.5, paper_height / 3.5)
-            ctx.font = '${font_size}px Georgia'
-            ctx.fillStyle = 'black'
-    
-            const max_width = paper_width * 0.88
-            let words = text.split(' ')
-            let lines = []
-            let line = ''
-    
-            for (let word of words) {
-                let test_line = line + (line ? ' ' : '') + word
-                let test_width = ctx.measureText(test_line).width
-    
-                if (test_width > max_width && line) {
-                    lines.push(line)
-                    line = word
-                } else {
-                    line = test_line
-                }
-            }
-            if (line) lines.push(line)
-    
-            while (lines.length * font_size > paper_height * 0.85) {
-                font_size -= 2
-                ctx.font = '${font_size}px Georgia'
-    
-                let tmp_lines = []
-                let tmp_line = ''
-                for (let word of words) {
-                    let test_line = tmp_line + (tmp_line ? ' ' : '') + word
-                    let test_width = ctx.measureText(test_line).width
-    
-                    if (test_width > max_width && tmp_line) {
-                        tmp_lines.push(tmp_line)
-                        tmp_line = word
-                    } else {
-                        tmp_line = test_line
+            const canvas = createCanvas(512, 512);
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const findOptimalFontSize = (text, maxWidth, maxHeight) => {
+                let fontSize = 100;
+                ctx.font = `bold ${fontSize}px ArialNarrow`;
+                const words = text.split(' ');
+                let lines = [];
+
+                while (fontSize > 0) {
+                    lines = [];
+                    let currentLine = [];
+                    let currentWidth = 0;
+                    ctx.font = `bold ${fontSize}px ArialNarrow`;
+
+                    for (const word of words) {
+                        const wordWidth = ctx.measureText(word + ' ').width;
+                        if (currentWidth + wordWidth <= maxWidth) {
+                            currentLine.push(word);
+                            currentWidth += wordWidth;
+                        } else {
+                            if (currentLine.length > 0) lines.push(currentLine);
+                            currentLine = [word];
+                            currentWidth = wordWidth;
+                        }
                     }
+
+                    if (currentLine.length > 0) lines.push(currentLine);
+
+                    const totalHeight = lines.length * (fontSize + 10);
+                    if (totalHeight <= maxHeight) break;
+
+                    fontSize -= 2;
                 }
-                if (tmp_line) tmp_lines.push(tmp_line)
-                lines = tmp_lines
-            }
-    
-            let line_height = font_size * 1.15
-            let text_height = lines.length * line_height
-    
-            let textStartY = paper_y + (paper_height - text_height) / 2 + (lines.length > 2 ? 270 : 275)
-    
-            ctx.save()
-            ctx.translate(paper_x + paper_width / 2 + 24, textStartY)
-            ctx.rotate(0.12)
-    
-            ctx.textAlign = 'center'
-    
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)'
-            ctx.shadowBlur = 3
-            ctx.shadowOffsetX = 2
-            ctx.shadowOffsetY = 2
-    
-            for (let i = 0; i < lines.length; i++) {
-                ctx.fillText(lines[i], 0, i * line_height)
-            }
-            
-            ctx.restore()    
+                return { fontSize, lines };
+            };
+
+            let padding = 40;
+            let maxWidth = canvas.width - padding * 2;
+            let maxHeight = canvas.height - padding * 2;
+            let { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight);
+
+            ctx.fillStyle = '#000000';
+            ctx.font = `bold ${fontSize}px ArialNarrow`;
+
+            let lineHeight = fontSize + 10;
+            let totalHeight = lines.length * lineHeight;
+            let startY = (canvas.height - totalHeight) / 2 + fontSize / 2;
+
+            lines.forEach((line, i) => {
+                if (line.length === 1) {
+                    ctx.textAlign = 'left';
+                    ctx.fillText(line.join(' '), padding, startY + i * lineHeight);
+                } else {
+                    let totalSpacing = maxWidth - line.reduce((acc, word) => acc + ctx.measureText(word).width, 0);
+                    let spaceBetween = line.length > 1 ? totalSpacing / (line.length - 1) : 0;
+
+                    let currentX = padding;
+                    line.forEach((word) => {
+                        ctx.fillText(word, currentX, startY + i * lineHeight);
+                        currentX += ctx.measureText(word).width + spaceBetween;
+                    })
+                }
+            })
+
             return canvas.toBuffer('image/png')
-        } catch (error) {
-            console.error('Error:', error);
+        } catch (e) {
+            console.error(e);
+            await m.reply(`Terjadi kesalahan saat membuat stiker: ${e.message}`);
         }
     }
 }
