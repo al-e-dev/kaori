@@ -87,7 +87,7 @@ export default new class Convert {
                 else {
                     const wordsWidth = line.reduce((acc, word) => acc + ctx.measureText(word).width, 0)
                     const space = (canvas.width - wordsWidth - 15 * 2) / (line.length - 1)
-                    let x = canvas.height - wordsWidth - 15 * 2
+                    let x = 15
                     line.forEach(word => { ctx.fillText(word, x, y); x += ctx.measureText(word).width + space; })
                 }
             })
