@@ -51,14 +51,14 @@ export default new class Convert {
     }
     async brat(text) {
         try {
-            const canvas = createCanvas(100, 100);
-            const ctx = canvas.getContext('2d');
+            const canvas = createCanvas(512, 512)
+            const ctx = canvas.getContext('2d')
     
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#ffffff'
+            ctx.fillRect(0, 0, canvas.width, canvas.height)
     
             const findOptimalFontSize = (text, maxWidth, maxHeight) => {
-                let fontSize = 170;
+                let fontSize = 170
                 let lines = [];
                 const words = text.split(' ');
     
@@ -87,9 +87,10 @@ export default new class Convert {
                 }
                 return { fontSize, lines };
             }
-    
-            let maxWidth = canvas.width
-            let maxHeight = canvas.height
+
+            let padding = 20;
+            let maxWidth = canvas.width - padding * 2
+            let maxHeight = canvas.height - padding * 2
             const { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight);
     
             ctx.filter = 'blur(100px)'
