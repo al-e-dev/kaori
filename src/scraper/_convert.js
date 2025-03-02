@@ -51,26 +51,30 @@ export default new class Convert {
     }
     async brat(text) {
         try {
-            const canvas = createCanvas(512, 512);
+            // Crear canvas con dimensiones según CSS
+            const canvas = createCanvas(350, 510);
             const ctx = canvas.getContext('2d');
-    
+
             // Fondo blanco
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
+
+            // Aplicar filtro de desenfoque
+            ctx.filter = 'blur(2px)';
+
+            // Función para encontrar el tamaño óptimo de fuente y separar en líneas
             const findOptimalFontSize = (text, maxWidth, maxHeight) => {
-                let fontSize = 170;
-                ctx.font = `${fontSize}px Arial Narrow`;
-                const words = text.split(' ');
+                let fontSize = 170; // Comenzamos con texto grande
                 let lines = [];
-    
+                const words = text.split(' ');
+
                 while (fontSize > 0) {
                     lines = [];
                     let currentLine = [];
                     let currentWidth = 0;
-                    ctx.font = `${fontSize}px Arial Narrow`;
-    
+                    ctx.font = `500 ${fontSize}px "Arial Narrow"`;
                     for (const word of words) {
+                        // Considera el ancho de la palabra más un espacio
                         const wordWidth = ctx.measureText(word + ' ').width;
                         if (currentWidth + wordWidth <= maxWidth) {
                             currentLine.push(word);
@@ -82,39 +86,59 @@ export default new class Convert {
                         }
                     }
                     if (currentLine.length > 0) lines.push(currentLine);
-    
-                    const totalHeight = lines.length * (fontSize + 10);
+
+                    // Usamos el tamaño de fuente como altura de línea (line-height igual a font-size)
+                    const lineHeight = fontSize;
+                    const totalHeight = lines.length * lineHeight;
                     if (totalHeight <= maxHeight) break;
-    
                     fontSize -= 2;
                 }
                 return { fontSize, lines };
             };
-    
-            let padding = 40;
-            let maxWidth = canvas.width - padding * 2;
-            let maxHeight = canvas.height - padding * 2;
-            let { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight);
-    
-            ctx.fillStyle = 'black';
-            ctx.font = `500 ${fontSize}px Arial Narrow`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-    
-            // Aplicar desenfoque
-            ctx.filter = 'blur(2px)';
-    
-            let lineHeight = fontSize + 10;
-            let startY = (canvas.height - lines.length * lineHeight) / 2;
-    
+
+            // Definir área de dibujo completa (sin padding, de acuerdo al CSS)
+            const maxWidth = canvas.width;
+            const maxHeight = canvas.height;
+            const { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight);
+
+            // Configurar fuente y color para el texto
+            ctx.fillStyle = '#000000';
+            ctx.font = `500 ${fontSize}px "Arial Narrow"`;
+
+            // Calcular la posición vertical para centrar el texto
+            const lineHeight = fontSize; // line-height igual a fontSize
+            const totalTextHeight = lines.length * lineHeight;
+            const startY = (canvas.height - totalTextHeight) / 2 + fontSize / 2;
+
+            // Dibujar cada línea con justificación
             lines.forEach((line, i) => {
-                const lineText = line.join(' ');
-                ctx.fillText(lineText, canvas.width / 2, startY + i * lineHeight);
+                const y = startY + i * lineHeight;
+                if (line.length === 1) {
+                    // Si la línea tiene solo una palabra, centrar horizontalmente
+                    ctx.textAlign = 'center';
+                    const x = canvas.width / 2;
+                    ctx.fillText(line.join(' '), x, y);
+                } else {
+                    // Para múltiples palabras, distribuir espacios para justificar la línea
+                    const wordsWidth = line.reduce((acc, word) => acc + ctx.measureText(word).width, 0);
+                    const totalSpacing = canvas.width - wordsWidth;
+                    const spaceBetween = totalSpacing / (line.length - 1);
+                    let x = 0;
+                    ctx.textAlign = 'left';
+                    line.forEach((word, index) => {
+                        ctx.fillText(word, x, y);
+                        x += ctx.measureText(word).width + spaceBetween;
+                    });
+                }
             });
-    
-            return canvas.toBuffer('image/png')
+
+            // Restaurar el filtro (opcional)
+            ctx.filter = 'none';
+
+            return canvas.toBuffer('image/png');
         } catch (e) {
-            throw new Error(`Error generating image: ${e.message}`);
+            console.error(e);
+            await m.reply(`Terjadi kesalahan saat membuat stiker: ${e.message}`);
         }
     }
 }
