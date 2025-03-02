@@ -55,16 +55,15 @@ export default new class Convert {
             const canvas = createCanvas(500, 500);
             const ctx = canvas.getContext('2d');
 
-            // Fondo blanco
+            // Dibujar fondo blanco
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Aplicar filtro de desenfoque para todo lo que se dibuje a continuación
+            // Aplicar filtro de desenfoque y opacidad (se aplicará a todo lo que se dibuje)
             ctx.filter = 'blur(2px)';
-            // Aplicar opacidad al 80%
             ctx.globalAlpha = 0.8;
 
-            // Función para encontrar el tamaño óptimo de fuente y separar el texto en líneas
+            // Función para determinar el tamaño óptimo de fuente y separar en líneas sin usar padding
             const findOptimalFontSize = (text, maxWidth, maxHeight) => {
                 let fontSize = 170; // Tamaño inicial según CSS
                 let lines = [];
@@ -75,7 +74,6 @@ export default new class Convert {
                     let currentLine = [];
                     let currentWidth = 0;
                     ctx.font = `500 ${fontSize}px "Arial Narrow"`;
-
                     for (const word of words) {
                         const wordWidth = ctx.measureText(word + ' ').width;
                         if (currentWidth + wordWidth <= maxWidth) {
@@ -89,7 +87,8 @@ export default new class Convert {
                     }
                     if (currentLine.length > 0) lines.push(currentLine);
 
-                    const lineHeight = fontSize; // Usamos line-height igual al tamaño de fuente
+                    // Usar fontSize como line-height
+                    const lineHeight = fontSize;
                     const totalHeight = lines.length * lineHeight;
                     if (totalHeight <= maxHeight) break;
                     fontSize -= 2;
@@ -101,31 +100,25 @@ export default new class Convert {
             const maxHeight = canvas.height;
             const { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight);
 
-            // Configurar color y fuente (el color en rgba asegura que se respete la opacidad)
+            // Configurar color y fuente (usamos rgba para asegurar la opacidad en el texto)
             ctx.fillStyle = `rgba(0, 0, 0, 0.8)`;
             ctx.font = `500 ${fontSize}px "Arial Narrow"`;
-            // Usar textBaseline 'middle' para facilitar el centrado vertical
-            ctx.textBaseline = 'middle';
+            ctx.textBaseline = 'top';
+            ctx.textAlign = 'left';
 
-            const lineHeight = fontSize; // Igual al tamaño de fuente
-            const totalTextHeight = lines.length * lineHeight;
-            // Calcular la posición Y para centrar verticalmente:
-            const startY = (canvas.height - totalTextHeight) / 2 + lineHeight / 2;
+            const lineHeight = fontSize;
 
-            // Dibujar cada línea
+            // Dibujar el texto comenzando desde la parte superior, alineado a la izquierda
             lines.forEach((line, i) => {
-                const y = startY + i * lineHeight;
+                const y = i * lineHeight;
                 if (line.length === 1) {
-                    // Si es una sola palabra, centrar horizontalmente
-                    ctx.textAlign = 'center';
-                    const x = canvas.width / 2;
-                    ctx.fillText(line.join(' '), x, y);
+                    // Línea con una sola palabra: alinear a la izquierda
+                    ctx.fillText(line.join(' '), 0, y);
                 } else {
-                    // Para líneas con varias palabras, justificar el texto
-                    ctx.textAlign = 'left';
+                    // Línea con varias palabras: justificar la línea
                     const wordsWidth = line.reduce((acc, word) => acc + ctx.measureText(word).width, 0);
                     const totalSpacing = canvas.width - wordsWidth;
-                    const spaceBetween = line.length > 1 ? totalSpacing / (line.length - 1) : 0;
+                    const spaceBetween = totalSpacing / (line.length - 1);
                     let x = 0;
                     line.forEach((word) => {
                         ctx.fillText(word, x, y);
@@ -134,7 +127,7 @@ export default new class Convert {
                 }
             });
 
-            // Restaurar filtro y opacidad para futuras operaciones (opcional)
+            // Restaurar configuraciones por si se requieren en futuras operaciones
             ctx.filter = 'none';
             ctx.globalAlpha = 1;
 
