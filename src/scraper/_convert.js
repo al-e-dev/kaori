@@ -51,76 +51,47 @@ export default new class Convert {
     }
     async brat(text) {
         try {
-            const canvas = createCanvas(512, 512)
-            const ctx = canvas.getContext('2d')
+            const canvas = createCanvas(512, 512);
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, 512, 512);
 
-            ctx.fillStyle = '#ffffff'
-            ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-            const findOptimalFontSize = (text, maxWidth, maxHeight) => {
-                let fontSize = 170
-                let lines = [];
-                const words = text.split(' ');
-
-                while (fontSize > 0) {
-                    lines = [];
-                    let currentLine = [];
-                    let currentWidth = 0;
-                    ctx.font = `500 ${fontSize}px "Arial Narrow"`;
-                    for (const word of words) {
+            const findFontSize = (t, w, h) => {
+                let size = 170, lines = [];
+                while (size > 0) {
+                    lines = []; let line = [], width = 0;
+                    ctx.font = `500 ${size}px "Arial Narrow"`;
+                    for (const word of t.split(' ')) {
                         const wordWidth = ctx.measureText(word + ' ').width;
-                        if (currentWidth + wordWidth <= maxWidth) {
-                            currentLine.push(word);
-                            currentWidth += wordWidth;
-                        } else {
-                            if (currentLine.length > 0) lines.push(currentLine);
-                            currentLine = [word];
-                            currentWidth = wordWidth;
-                        }
+                        if (width + wordWidth <= w) line.push(word), width += wordWidth;
+                        else { lines.push(line); line = [word]; width = wordWidth; }
                     }
-                    if (currentLine.length > 0) lines.push(currentLine);
-
-                    const lineHeight = fontSize;
-                    const totalHeight = lines.length * lineHeight;
-                    if (totalHeight <= maxHeight) break;
-                    fontSize -= 2;
+                    if (line.length) lines.push(line);
+                    if (lines.length * size <= h) break;
+                    size -= 2;
                 }
-                return { fontSize, lines };
-            }
+                return { size, lines };
+            };
 
-            let padding = 20;
-            let maxWidth = canvas.width - padding * 2
-            let maxHeight = canvas.height - padding * 2
-            const { fontSize, lines } = findOptimalFontSize(text, maxWidth, maxHeight)
-
-            ctx.filter = ' blur(4px)'
-
-            ctx.fillStyle = `rgba(0, 0, 0, 1)`;
-            ctx.font = `500 ${fontSize}px "Arial Narrow"`;
+            const { size, lines } = findFontSize(text, 472, 472);
+            ctx.filter = 'blur(4px)';
+            ctx.fillStyle = 'black';
+            ctx.font = `500 ${size}px "Arial Narrow"`;
             ctx.textBaseline = 'top';
             ctx.textAlign = 'left';
 
-            ctx.drawImage(canvas, 0, 0, canvas.width / 2, canvas.height / 2);
-            ctx.drawImage(canvas, 0, 0, canvas.width / 2, canvas.height / 2, 0, 0, canvas.width, canvas.height)
-
-            const lineHeight = fontSize;
+            ctx.drawImage(canvas, 0, 0, 256, 256, 0, 0, 512, 512);
 
             lines.forEach((line, i) => {
-                const y = i * lineHeight;
-                if (line.length === 1) {
-                    ctx.fillText(line.join(' '), 0, y);
-                } else {
+                const y = i * size;
+                if (line.length === 1) ctx.fillText(line.join(' '), 0, y);
+                else {
                     const wordsWidth = line.reduce((acc, word) => acc + ctx.measureText(word).width, 0);
-                    const totalSpacing = canvas.width - wordsWidth;
-                    const spaceBetween = totalSpacing / (line.length - 1);
+                    const space = (512 - wordsWidth) / (line.length - 1);
                     let x = 0;
-                    line.forEach((word) => {
-                        ctx.fillText(word, x, y);
-                        x += ctx.measureText(word).width + spaceBetween;
-                    });
+                    line.forEach(word => { ctx.fillText(word, x, y); x += ctx.measureText(word).width + space; });
                 }
             });
-
             return canvas.toBuffer('image/png');
         } catch (e) {
             console.error(e);
