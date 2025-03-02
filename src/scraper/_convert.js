@@ -82,8 +82,8 @@ export default new class Convert {
             ctx.textAlign = 'left'
 
             lines.forEach((line, i) => {
-                const y = 15 + i * size * 1.2
-                if (line.length === 1) ctx.fillText(line.join(' '), 15, y)
+                const y = i * size;
+                if (line.length === 1) ctx.fillText(line.join(' '), ctx.measureText(line.join(' ')).width, y)
                 else {
                     const wordsWidth = line.reduce((acc, word) => acc + ctx.measureText(word).width, 0)
                     const space = (canvas.width - wordsWidth - 15 * 2) / (line.length - 1)
