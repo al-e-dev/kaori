@@ -1,6 +1,7 @@
 export default {
     name: 'brat',
     description: 'Convierte texto en brat',
+    params: ['query'],
     comand: ['brat'],
     os: true,
     exec: async (m, { sock, Scrap }) => {
