@@ -74,13 +74,10 @@ export default new class Convert {
             };
 
             const { size, lines } = findFontSize(text, 472, 472);
-            ctx.filter = 'blur(4px)';
             ctx.fillStyle = 'black';
             ctx.font = `500 ${size}px "Arial Narrow"`;
             ctx.textBaseline = 'top';
             ctx.textAlign = 'left';
-
-            ctx.drawImage(canvas, 0, 0, 256, 256, 0, 0, 512, 512);
 
             lines.forEach((line, i) => {
                 const y = i * size;
@@ -92,6 +89,10 @@ export default new class Convert {
                     line.forEach(word => { ctx.fillText(word, x, y); x += ctx.measureText(word).width + space; });
                 }
             });
+
+            ctx.filter = 'blur(4px)';
+            ctx.drawImage(canvas, 0, 0)
+
             return canvas.toBuffer('image/png');
         } catch (e) {
             console.error(e);
