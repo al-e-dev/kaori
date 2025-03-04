@@ -51,25 +51,33 @@ const start = async () => {
         if (connection == "close") {
             let reason = new Boom(lastDisconnect?.error)?.output?.statusCode
             if (reason == DisconnectReason.badSession) {
-                console.log(chalk.bgRed(`[ ${Time} ] Se daño la carpeta auth, borre la carpeta y escanee el QR nuevamente.`));
+                console.log(chalk.bgRed(`[ ${Time} ]  Sesión inválida. Revisa la configuración de tu sesión.`));
                 process.exit()
             } else if (reason == DisconnectReason.connectionClosed) {
-                console.log(chalk.bgRed(`[ ${Time} ] Se cerro la conexion conectando de nuevo`))
+                console.log(chalk.bgRed(`[ ${Time} ] Conexión cerrada inesperadamente. Verifica tu conexión a Internet.`))
                 start()
             } else if (reason == DisconnectReason.connectionLost) {
-                console.log(chalk.bgRed(`[ ${Time} ] Se perdio la conexion con el servidor reconectando...`))
+                console.log(chalk.bgRed(`[ ${Time} ] Conexión perdida. Revisa tu red para reestablecer la conexión.`))
                 start()
             } else if (reason == DisconnectReason.connectionReplaced) {
-                console.log(chalk.bgRed(`[ ${Time} ] Se creo una nueva sesion y reemplazo la actual, revise y escanee nuevamente el QR`))
+                console.log(chalk.bgRed(`[ ${Time} ] Conexión reemplazada. Otra instancia podría haber iniciado sesión.`))
                 process.exit()
+            } else if (reason == DisconnectReason.forbidden) {
+                console.log(chalk.bgRed(`[ ${Time} ] Acceso prohibido. Verifica tus credenciales y permisos.`))
+
             } else if (reason == DisconnectReason.loggedOut) {
-                console.log(chalk.bgRed(`[ ${Time} ] El dispositivo se desvinculo, borre la carpeta auth y escanee el codigo QR nuevamente.`))
+                console.log(chalk.bgRed(`[ ${Time} ] Sesión cerrada. Es necesario iniciar sesión nuevamente.`))
                 process.exit()
+            } else if (reason == DisconnectReason.multideviceMismatch) {
+                console.log(chalk.bgRed(`[ ${Time} ] Diferencia de dispositivos. Revisa la configuración de tu sesión.`))
             } else if (reason == DisconnectReason.restartRequired) {
                 console.log(chalk.bgRed(`[ ${Time} ] Es necesario reiniciar, se reiniciara automaticamente aguarde...`))
                 start()
             } else if (reason == DisconnectReason.timedOut) {
                 console.log(chalk.bgRed(`[ ${Time} ] Se agoto el tiempo de espera, reconectando...`))
+                start()
+            } else if (reason == DisconnectReason.unavailableService) {
+                console.log(chalk.bgRed(`[ ${Time} ] Servicio no disponible, intentalo nuevamente mas tarde.`))
                 start()
             }
             else {
@@ -250,10 +258,6 @@ const start = async () => {
                 }
             }
         }
-    })
-
-    sock.ev.on("message.viewonce", async (update) => {
-
     })
 
     sock.ev.on("message.delete", async ({ key: { remoteJid, id, participant } }) => {
