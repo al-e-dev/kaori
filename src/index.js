@@ -228,7 +228,7 @@ const start = async () => {
                     }
                 }
 
-                // console.log(JSON.stringify(m.message, null, 2))
+                console.log(JSON.stringify(m.message, null, 2))
 
                 for (const plugin of global.plugins) {
                     if (!plugin.disable && plugin.comand ? (Array.isArray(plugin.comand) ? plugin.comand.includes(m.command) : plugin.comand.test(m.body)) : undefined) {
