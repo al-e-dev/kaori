@@ -16,11 +16,12 @@ export default {
             result = search[0]
         }
 
-        const download = await Youtube.convert(result.url, 360)
-
-        await sock.sendMessage(m.from, {
-            video: { url: download.url },
-            caption: `Video de ${result.author} descargado con éxito`
+        await Youtube.convert(result.url, 360).then(async (download) => {
+            await sock.sendMessage(m.from, {
+                video: { url: download.url },
+                caption: `Video de ${result.author} descargado con éxito`
+            })
         })
+
     }
 }

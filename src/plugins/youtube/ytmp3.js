@@ -16,12 +16,13 @@ export default {
             result = search[0]
         }
 
-        const download = await Youtube.convert(result.url, 320)
-
-        await sock.sendMessage(m.from, {
-            audio: { url: download.url },
-            mimetype: 'audio/mpeg',
-            ptt: true
+        await Youtube.convert(result.url, 320).then(async (download) => {
+            await sock.sendMessage(m.from, {
+                audio: { url: download.url },
+                mimetype: 'audio/mpeg',
+                ptt: true
+            })
         })
+
     }
 }

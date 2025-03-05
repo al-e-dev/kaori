@@ -7,7 +7,7 @@ export default {
     comand: ['youtube', 'yt', 'play'],
     os: true,
     exec: async (m, { sock }) => {
-        const videos = await YouTube.search(m.text)
+        const videos = await YouTube.search(m.text).then((data => data))
         const video = videos[0]
 
         sock.sendMessage(m.from, {

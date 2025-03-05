@@ -102,8 +102,6 @@ export default new class Download {
                     }
                 }
                 resolve(result)
-            }).catch(() => {
-                reject({ status: false, message: "Error get video information from YouTube" })
             })
         })
     }
@@ -120,11 +118,7 @@ export default new class Download {
                         url: y.url,
                         filename: `${x.title} (${quality}${this.audio.includes(quality) ? "kbps).mp3" : "p).mp4"}`
                     })
-                }).catch(() => {
-                    reject({ status: false, message: "Error converting YouTube video at the specified quality (progress check failed)" })
                 })
-            }).catch(() => {
-                reject({ status: false, message: "Error converting YouTube video at the specified quality (initial conversion failed)" })
             })
         })
     }
@@ -157,11 +151,7 @@ export default new class Download {
                             quality
                         }
                     })
-                }).catch(() => {
-                    reject({ status: false, message: "Error download YouTube video to MP3 format" })
                 })
-            }).catch(() => {
-                reject({ status: false, message: "Error get video information from YouTube" })
             })
         })
     }
@@ -194,11 +184,7 @@ export default new class Download {
                             quality
                         }
                     })
-                }).catch(() => {
-                    reject({ status: false, message: "Error download YouTube video to MP4 format" })
                 })
-            }).catch(() => {
-                reject({ status: false, message: "Error get video information from YouTube" })
             })
         })
     }
