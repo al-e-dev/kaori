@@ -6,7 +6,7 @@ import { wrapper } from "axios-cookiejar-support"
 
 export default new class Request {
     constructor() {
-        this.jar =  new CookieJar()
+        this.jar = new CookieJar()
         this.cloud = cloudscraper
         this.client = wrapper(axios.create({ jar: new CookieJar() }))
         this.axios = wrapper(axios.create({
