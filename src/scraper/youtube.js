@@ -14,8 +14,6 @@ export default new class Download {
         this._extract = data => data ? JSON.parse(data.split("var ytInitialData = ")[1].split("</")[0].slice(0, -1)) : new Error("No data provided")
         this._date = date => new Date(Date.parse(date.split(" ").slice(1).join(" "))).toISOString()
         this._convert = value => parseFloat(value.replace(/[^0-9.]/g, "")) * (value.includes("k") || value.includes("K") ? 1000 : value.includes("M") ? 1000000 : 1)
-
-        ytmp4("https://www.youtube.com/watch?v=ACwAviLRn_g").then().catch()
     }
 
     getYouTubeID(input) {
