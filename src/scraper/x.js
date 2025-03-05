@@ -89,7 +89,7 @@ export default new class Twitter {
                 }
             }).then(({ data }) => {
                 resolve(data.includes)
-            }).catch(err => { reject(err) })
+            }).catch(err => reject({ status: false, error: err }))
         })
     }
 }

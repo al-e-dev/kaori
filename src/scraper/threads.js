@@ -117,7 +117,7 @@ export default new class Threads {
                 }
 
                 resolve({ status: false, url })
-            }).catch(err => {reject(err)})
+            }).catch(err => reject({ status: false, error: err }))
         })
     }
 }
