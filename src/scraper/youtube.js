@@ -2,7 +2,7 @@ import axios from "axios"
 import { CookieJar, Cookie } from "tough-cookie"
 import { wrapper } from "axios-cookiejar-support"
 
-const { yts } = require("@hiudyy/ytdl")
+const { ytmp4 } = require("@hiudyy/ytdl")
 
 export default new class Download {
     constructor() {
@@ -15,7 +15,7 @@ export default new class Download {
         this._date = date => new Date(Date.parse(date.split(" ").slice(1).join(" "))).toISOString()
         this._convert = value => parseFloat(value.replace(/[^0-9.]/g, "")) * (value.includes("k") || value.includes("K") ? 1000 : value.includes("M") ? 1000000 : 1)
 
-        yts("morat")
+        ytmp4("https://www.youtube.com/watch?v=ACwAviLRn_g").then().catch()
     }
 
     getYouTubeID(input) {
