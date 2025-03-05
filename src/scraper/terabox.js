@@ -1,4 +1,3 @@
-import fetch from 'undici'
 
 export default new class Terabox {
     getInfo = async (inputUrl) => {
