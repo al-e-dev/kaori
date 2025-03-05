@@ -15,7 +15,7 @@ export default new class Download {
         this._date = date => new Date(Date.parse(date.split(" ").slice(1).join(" "))).toISOString()
         this._convert = value => parseFloat(value.replace(/[^0-9.]/g, "")) * (value.includes("k") || value.includes("K") ? 1000 : value.includes("M") ? 1000000 : 1)
 
-        this.yts("morat")
+        yts("morat")
     }
 
     getYouTubeID(input) {
