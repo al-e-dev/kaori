@@ -88,7 +88,7 @@ export default new class Download {
                     url: `https://www.youtube.com/watch?v=${id}`,
                     title: v.title.runs[0].text,
                     description: c.find(item => item.videoSecondaryInfoRenderer)?.videoSecondaryInfoRenderer?.attributedDescription?.content || "No description",
-                    date: this._date(v.dateText.simpleText),
+                    date: v.dateText.simpleText,
                     views: this._convert(v.viewCount.videoViewCountRenderer.viewCount.simpleText),
                     likes: this._convert(v.videoActions?.menuRenderer?.topLevelButtons?.find(btn => btn.segmentedLikeDislikeButtonViewModel?.likeButtonViewModel?.likeButtonViewModel)?.segmentedLikeDislikeButtonViewModel.likeButtonViewModel.likeButtonViewModel.toggleButtonViewModel.toggleButtonViewModel.toggledButtonViewModel.buttonViewModel.title),
                     thumbnail: `https://i.ytimg.com/vi/${id}/hq720.jpg`,
