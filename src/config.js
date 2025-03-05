@@ -9,7 +9,7 @@ global.origen = path.dirname(fileURLToPath(import.meta.url))
 global._config = {
     owner: {
         number: "51968374620",
-        name: "Alexito"
+        name: "Alexito-Hub"
     },
     bot: {
         name: "Kaori Network",
